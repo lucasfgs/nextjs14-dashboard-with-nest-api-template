@@ -1,13 +1,6 @@
 import { cookies } from "next/headers";
-import { CognitoJwtVerifier } from "aws-jwt-verify";
-import { JwtExpiredError } from "aws-jwt-verify/error";
 
 // Verifier that expects valid access tokens:
-const verifier = CognitoJwtVerifier.create({
-  userPoolId: process.env.COGNITO_POOL_ID as string,
-  tokenUse: "access",
-  clientId: process.env.COGNITO_APP_CLIENT_ID as string,
-});
 
 function getTokenFromCookies(): string | null {
   const cookieStore = cookies();
@@ -34,18 +27,19 @@ function getTokenFromCookies(): string | null {
 }
 
 export async function validateAuthenticatedUser() {
-  const token = await getTokenFromCookies();
+  return true;
+  // const token = await getTokenFromCookies();
 
-  if (!token) {
-    return null;
-  }
+  // if (!token) {
+  //   return null;
+  // }
 
-  try {
-    return await verifier.verify(token);
-  } catch (error) {
-    if (error instanceof JwtExpiredError) {
-      return "ACCESS_TOKEN_EXPIRED";
-    }
-    return null;
-  }
+  // try {
+  //   return await verifier.verify(token);
+  // } catch (error) {
+  //   if (error instanceof JwtExpiredError) {
+  //     return "ACCESS_TOKEN_EXPIRED";
+  //   }
+  //   return null;
+  // }
 }
