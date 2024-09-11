@@ -18,7 +18,7 @@ type LoginResponse = {
 const LOGIN_USER_MUTATION_KEY = ["loginUserMutation"];
 
 const login = async (loginData: Login): Promise<LoginResponse> => {
-  const { data } = await api.post("/auth/login", loginData);
+  const { data } = await api.post("/login", loginData);
   return data;
 };
 
@@ -37,6 +37,7 @@ export const useLogin = () => {
     onSuccess: (data) => {
       toast.success("Logged in successfully");
       setAccessToken(data.access_token);
+      api.defaults.headers.Authorization = "Bearer " + data.access_token;
       router.push("/dashboard");
     },
   });

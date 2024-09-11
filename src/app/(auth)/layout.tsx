@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { validateAuthenticatedUser } from "@/utils/aws/validateAuthenticatedUser";
+import { validateAuthenticatedUser } from "@/utils/validateAuthenticatedUser";
 import AuthLayout from "@/components/pages/auth/_layout";
 
 export const metadata: Metadata = {

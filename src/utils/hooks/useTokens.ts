@@ -1,39 +1,40 @@
 import { useEffect, useState } from "react";
+import { getCookie, setCookie, deleteCookie } from "cookies-next";
 
 export default function useTokens() {
   const [accessToken, storeAccessToken] = useState<string | null>(null);
   const [refreshToken, storeRefreshToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedAccessToken = window.localStorage.getItem("accessToken");
-    const storedRefreshToken = window.localStorage.getItem("refreshToken");
+    const storedAccessToken = getCookie("accessToken");
+    const storedRefreshToken = getCookie("refreshToken");
 
     if (storedAccessToken) {
-      storeAccessToken(JSON.parse(storedAccessToken));
+      storeAccessToken(storedAccessToken);
     }
 
     if (storedRefreshToken) {
-      storeRefreshToken(JSON.parse(storedRefreshToken));
+      storeRefreshToken(storedRefreshToken);
     }
   }, []);
 
   const setAccessToken = (accessToken: string) => {
-    window.localStorage.setItem("accessToken", JSON.stringify(accessToken));
+    setCookie("accessToken", accessToken);
     storeAccessToken(accessToken);
   };
 
   const setRefreshToken = (refreshToken: string) => {
-    window.localStorage.setItem("refreshToken", JSON.stringify(refreshToken));
+    setCookie("refreshToken", refreshToken);
     storeRefreshToken(refreshToken);
   };
 
   const removeAccessToken = () => {
-    window.localStorage.removeItem("accessToken");
+    deleteCookie("accessToken");
     storeAccessToken(null);
   };
 
   const removeRefreshToken = () => {
-    window.localStorage.removeItem("refreshToken");
+    deleteCookie("refreshToken");
     storeRefreshToken(null);
   };
 
