@@ -27,13 +27,11 @@ function getTokenFromCookies(): string | null {
 }
 
 export async function validateAuthenticatedUser() {
-  return true;
+  // return true;
   // const token = await getTokenFromCookies();
-
   // if (!token) {
   //   return null;
   // }
-
   // try {
   //   return await verifier.verify(token);
   // } catch (error) {

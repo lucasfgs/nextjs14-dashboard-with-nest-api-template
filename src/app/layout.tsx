@@ -3,10 +3,10 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import AuthenticatorProvider from "@/components/providers/authenticator";
-import { ThemeProvider } from "@/components/providers/theme";
 import "@/utils/aws/Amplify";
 import { Toaster } from "@/components/ui/sonner";
+
+import { Provider } from "./provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -28,15 +28,10 @@ export default function RootLayout({
           inter.variable
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthenticatorProvider>{children}</AuthenticatorProvider>
-        </ThemeProvider>
-        <Toaster />
+        <Provider>
+          {children}
+          <Toaster />
+        </Provider>
       </body>
     </html>
   );

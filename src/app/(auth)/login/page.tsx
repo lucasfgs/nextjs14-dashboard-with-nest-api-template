@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import "@aws-amplify/ui-react/styles.css";
-import * as Auth from "aws-amplify/auth";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useLogin } from "@/services/api/auth/useLogin";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -31,6 +31,8 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function Login() {
   const router = useRouter();
+
+  const { mutate: login, data, error } = useLogin();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -45,22 +47,24 @@ export default function Login() {
   async function onSubmit(values: FormSchema) {
     setIsLoading(true);
     try {
-      const user = await Auth.signIn({
-        username: values.email,
+      const user = login({
+        email: values.email,
         password: values.password,
       });
 
-      if (user.isSignedIn) {
-        router.push("/dashboard");
-      }
+      console.log(user);
 
-      switch (user.nextStep.signInStep) {
-        case "CONFIRM_SIGN_UP":
-          router.push(
-            `/auth/confirm-email?email=${encodeURIComponent(values.email)}`
-          );
-          break;
-      }
+      // if (user.isSignedIn) {
+      //   router.push("/dashboard");
+      // }
+
+      // switch (user.nextStep.signInStep) {
+      //   case "CONFIRM_SIGN_UP":
+      //     router.push(
+      //       `/auth/confirm-email?email=${encodeURIComponent(values.email)}`
+      //     );
+      //     break;
+      // }
     } catch (error: any) {
       toast.error("Invalid username or password");
       console.error("ERROR: ", error);
