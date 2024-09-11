@@ -46,7 +46,7 @@ export default function Login() {
 
       if (!email) {
         toast.error("Email not found");
-        return router.push("/auth/login");
+        return router.push("/login");
       }
 
       const confirmedUser = await Auth.confirmSignUp({
@@ -73,7 +73,7 @@ export default function Login() {
 
       if (!email) {
         toast.error("Email not found");
-        return router.push("/auth/login");
+        return router.push("/login");
       }
 
       await Auth.resendSignUpCode({

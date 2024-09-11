@@ -1,8 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import api from "@/configs/api";
+import useTokens from "@/utils/hooks/useTokens";
 
 type Login = {
   email: string;
@@ -16,12 +18,14 @@ type LoginResponse = {
 const LOGIN_USER_MUTATION_KEY = ["loginUserMutation"];
 
 const login = async (loginData: Login): Promise<LoginResponse> => {
-  console.log("login: ", loginData);
   const { data } = await api.post("/auth/login", loginData);
   return data;
 };
 
 export const useLogin = () => {
+  const { setAccessToken } = useTokens();
+  const router = useRouter();
+
   return useMutation<LoginResponse, AxiosError, Login>({
     mutationFn: login,
     mutationKey: LOGIN_USER_MUTATION_KEY,
@@ -32,7 +36,8 @@ export const useLogin = () => {
     },
     onSuccess: (data) => {
       toast.success("Logged in successfully");
-      console.log("Logged in: ", data);
+      setAccessToken(data.access_token);
+      router.push("/dashboard");
     },
   });
 };

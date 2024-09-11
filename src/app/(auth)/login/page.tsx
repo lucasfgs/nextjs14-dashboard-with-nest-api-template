@@ -3,11 +3,10 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import "@aws-amplify/ui-react/styles.css";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useEffect } from "react";
 
 import { Icons } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
@@ -32,9 +31,11 @@ type FormSchema = z.infer<typeof formSchema>;
 export default function Login() {
   const router = useRouter();
 
-  const { mutate: login, data, error } = useLogin();
+  const { mutate: login, data, error, status } = useLogin();
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  useEffect(() => {
+    console.log("status: ", status);
+  }, [status]);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -45,32 +46,10 @@ export default function Login() {
   });
 
   async function onSubmit(values: FormSchema) {
-    setIsLoading(true);
-    try {
-      const user = login({
-        email: values.email,
-        password: values.password,
-      });
-
-      console.log(user);
-
-      // if (user.isSignedIn) {
-      //   router.push("/dashboard");
-      // }
-
-      // switch (user.nextStep.signInStep) {
-      //   case "CONFIRM_SIGN_UP":
-      //     router.push(
-      //       `/auth/confirm-email?email=${encodeURIComponent(values.email)}`
-      //     );
-      //     break;
-      // }
-    } catch (error: any) {
-      toast.error("Invalid username or password");
-      console.error("ERROR: ", error);
-    } finally {
-      setIsLoading(false);
-    }
+    login({
+      email: values.email,
+      password: values.password,
+    });
   }
 
   return (
@@ -100,7 +79,7 @@ export default function Login() {
                           autoCapitalize="none"
                           autoComplete="email"
                           autoCorrect="off"
-                          disabled={isLoading}
+                          disabled={status === "pending"}
                           {...field}
                         />
                       </FormControl>
@@ -131,7 +110,7 @@ export default function Login() {
                           type="password"
                           autoCapitalize="none"
                           autoCorrect="off"
-                          disabled={isLoading}
+                          disabled={status === "pending"}
                           {...field}
                         />
                       </FormControl>
@@ -140,8 +119,10 @@ export default function Login() {
                   )}
                 />
               </div>
-              <Button disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button disabled={status === "pending"}>
+                {status === "pending" && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Sign In with Email
               </Button>
             </div>
@@ -157,16 +138,16 @@ export default function Login() {
             </span>
           </div>
         </div>
-        <Button variant="outline" type="button" disabled={isLoading}>
-          {isLoading ? (
+        <Button variant="outline" type="button" disabled={status === "pending"}>
+          {status === "pending" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Icons.facebook className="mr-2 h-4 w-4" />
           )}{" "}
           Facebook
         </Button>
-        <Button variant="outline" type="button" disabled={isLoading}>
-          {isLoading ? (
+        <Button variant="outline" type="button" disabled={status === "pending"}>
+          {status === "pending" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Icons.google className="mr-2 h-4 w-4" />

@@ -68,7 +68,7 @@ export default function Register() {
         },
       });
       if (user) {
-        router.push("/auth/login");
+        router.push("/login");
       }
     } catch (error: any) {
       toast.error("An account with the given email already exists.");
@@ -216,7 +216,7 @@ export default function Register() {
       <span className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link
-          href={"/auth/login"}
+          href={"/login"}
           className={
             "underline-offset-4 text-primary hover:opacity-70 hover:underline"
           }

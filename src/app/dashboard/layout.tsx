@@ -17,7 +17,7 @@ export default async function RootLayout({
   const authenticatedUser = await validateAuthenticatedUser();
 
   if (!authenticatedUser) {
-    redirect("/auth/login");
+    redirect("/login");
   }
 
   return <DashboardLayout>{children}</DashboardLayout>;

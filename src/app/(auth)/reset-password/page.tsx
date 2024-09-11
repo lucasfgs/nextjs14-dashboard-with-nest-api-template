@@ -86,7 +86,7 @@ export default function Login() {
       //     username: forgotPasswordForm.getValues("email"),
       //   });
 
-      router.push("/auth/login");
+      router.push("/login");
     } catch (error: any) {
       console.error("ERROR: ", error);
     } finally {

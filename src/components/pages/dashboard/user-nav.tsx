@@ -25,7 +25,7 @@ export function UserNav({
 
   async function signOut() {
     await Auth.signOut();
-    router.push("/auth/login");
+    router.push("/login");
   }
   return (
     <DropdownMenu>

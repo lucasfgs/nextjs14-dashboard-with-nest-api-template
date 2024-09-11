@@ -17,12 +17,12 @@ export default function useTokens() {
     }
   }, []);
 
-  const setAccessToken = () => {
+  const setAccessToken = (accessToken: string) => {
     window.localStorage.setItem("accessToken", JSON.stringify(accessToken));
     storeAccessToken(accessToken);
   };
 
-  const setRefreshToken = () => {
+  const setRefreshToken = (refreshToken: string) => {
     window.localStorage.setItem("refreshToken", JSON.stringify(refreshToken));
     storeRefreshToken(refreshToken);
   };
