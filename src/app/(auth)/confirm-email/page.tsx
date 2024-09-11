@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import "@aws-amplify/ui-react/styles.css";
 import * as Auth from "aws-amplify/auth";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";

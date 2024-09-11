@@ -96,7 +96,7 @@ export default function Login() {
                         <FormLabel htmlFor="password">Password</FormLabel>
 
                         <Link
-                          href={"/auth/forgot-password"}
+                          href={"/forgot-password"}
                           className="underline-offset-4 text-primary hover:opacity-70 hover:underline text-sm"
                         >
                           Forgot password?
@@ -159,7 +159,7 @@ export default function Login() {
       <span className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
         <Link
-          href={"/auth/register"}
+          href={"/register"}
           className={
             "underline-offset-4 text-primary hover:opacity-70 hover:underline"
           }

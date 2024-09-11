@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import "@/utils/aws/Amplify";
 import { Toaster } from "@/components/ui/sonner";
 
 import { Provider } from "./provider";

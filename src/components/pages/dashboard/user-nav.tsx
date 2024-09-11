@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import * as Auth from "aws-amplify/auth";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -16,15 +15,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import useTokens from "@/utils/hooks/useTokens";
 
 export function UserNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
   const router = useRouter();
+  const { removeAccessToken } = useTokens();
 
   async function signOut() {
-    await Auth.signOut();
+    removeAccessToken();
     router.push("/login");
   }
   return (
