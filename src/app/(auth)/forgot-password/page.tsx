@@ -7,7 +7,6 @@ import { useState } from "react";
 import "@aws-amplify/ui-react/styles.css";
 import * as Auth from "aws-amplify/auth";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useForgotPassword } from "@/services/api/auth/useForgotPassword";
 
 const forgotPasswodFormSchema = z.object({
   email: z.string().email(),
@@ -51,11 +51,10 @@ type ConfirmForgotPasswordCodeSchema = z.infer<
 
 export default function Login() {
   const router = useRouter();
+  const { mutate: forgotPassword, status } = useForgotPassword();
 
   const [shouldConfirmPasswordCode, setShouldConfirmPasswordCode] =
     useState<boolean>(false);
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const forgotPasswordForm = useForm<ForgotPasswordFormSchema>({
     resolver: zodResolver(forgotPasswodFormSchema),
@@ -76,25 +75,12 @@ export default function Login() {
     });
 
   async function resetPassword(values: ForgotPasswordFormSchema) {
-    setIsLoading(true);
-    try {
-      await Auth.resetPassword({
-        username: values.email,
-      });
-
-      setShouldConfirmPasswordCode(true);
-
-      //   router.push("/dashboard");
-    } catch (error: any) {
-      toast.error(error.message || "Something went wrong!");
-      console.error("ERROR: ", error);
-    } finally {
-      setIsLoading(false);
-    }
+    forgotPassword({
+      email: values.email,
+    });
   }
 
   async function confirmPasswordCode(values: ConfirmForgotPasswordCodeSchema) {
-    setIsLoading(true);
     try {
       await Auth.confirmResetPassword({
         confirmationCode: values.confirmationCode,
@@ -106,7 +92,6 @@ export default function Login() {
     } catch (error: any) {
       console.error("ERROR: ", error);
     } finally {
-      setIsLoading(false);
     }
   }
 
@@ -163,7 +148,7 @@ export default function Login() {
                             id="confirmationCode"
                             autoCapitalize="none"
                             autoCorrect="off"
-                            disabled={isLoading}
+                            disabled={status === "pending"}
                             {...field}
                           />
                         </FormControl>
@@ -184,7 +169,7 @@ export default function Login() {
                             type="password"
                             autoCapitalize="none"
                             autoCorrect="off"
-                            disabled={isLoading}
+                            disabled={status === "pending"}
                             {...field}
                           />
                         </FormControl>
@@ -207,7 +192,7 @@ export default function Login() {
                             type="password"
                             autoCapitalize="none"
                             autoCorrect="off"
-                            disabled={isLoading}
+                            disabled={status === "pending"}
                             {...field}
                           />
                         </FormControl>
@@ -216,8 +201,8 @@ export default function Login() {
                     )}
                   />
                 </div>
-                <Button disabled={isLoading}>
-                  {isLoading && (
+                <Button disabled={status === "pending"}>
+                  {status === "pending" && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
                   Next
@@ -242,7 +227,7 @@ export default function Login() {
                             type="email"
                             autoCapitalize="none"
                             autoCorrect="off"
-                            disabled={isLoading}
+                            disabled={status === "pending"}
                             {...field}
                           />
                         </FormControl>
@@ -251,8 +236,8 @@ export default function Login() {
                     )}
                   />
                 </div>
-                <Button disabled={isLoading}>
-                  {isLoading && (
+                <Button disabled={status === "pending"}>
+                  {status === "pending" && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
                   Send
@@ -271,7 +256,7 @@ export default function Login() {
           className="mt-2"
           onClick={() => resendCode()}
         >
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {status === "pending" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Resend
         </Button>
       </div> */}

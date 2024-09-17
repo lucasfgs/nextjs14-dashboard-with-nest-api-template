@@ -3,11 +3,9 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useAuthenticator } from "@aws-amplify/ui-react";
-import "@aws-amplify/ui-react/styles.css";
-import * as Auth from "aws-amplify/auth";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,10 +17,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useResetPassword } from "@/services/api/auth/useResetPassword";
+import { useAuth } from "@/components/pages/auth/context";
 
 const confirmForgotPasswordCodeSchema = z
   .object({
-    confirmationCode: z.string().min(6),
     password: z
       .string()
       .min(8)
@@ -40,58 +39,47 @@ const confirmForgotPasswordCodeSchema = z
     path: ["confirmPassword"],
   });
 
-type ConfirmForgotPasswordCodeSchema = z.infer<
-  typeof confirmForgotPasswordCodeSchema
->;
+type FormSchema = z.infer<typeof confirmForgotPasswordCodeSchema>;
 
 export default function Login() {
   const router = useRouter();
-  const { user } = useAuthenticator((context) => [context.user]);
 
-  const [shouldConfirmPasswordCode, setShouldConfirmPasswordCode] =
-    useState<boolean>(false);
+  const { email, confirmationCode } = useAuth();
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { mutate: resetPassword, status } = useResetPassword();
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(confirmForgotPasswordCodeSchema),
+    defaultValues: {
+      confirmPassword: "",
+      password: "",
+    },
+  });
 
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const user = await Auth.getCurrentUser();
-        if (user) {
-          router.push("/dashboard");
-        }
-      } catch (error) {
-        // User is not logged in
-      }
-    };
-    checkUser();
-  }, [router, user]);
-
-  const confirmForgotPasswordCodeForm =
-    useForm<ConfirmForgotPasswordCodeSchema>({
-      resolver: zodResolver(confirmForgotPasswordCodeSchema),
-      defaultValues: {
-        confirmationCode: "",
-        confirmPassword: "",
-        password: "",
-      },
-    });
-
-  async function confirmPasswordCode(values: ConfirmForgotPasswordCodeSchema) {
-    setIsLoading(true);
-    try {
-      //   await Auth.confirmResetPassword({
-      //     confirmationCode: values.confirmationCode,
-      //     newPassword: "newPassword",
-      //     username: forgotPasswordForm.getValues("email"),
-      //   });
-
+    if (!email || !confirmationCode) {
+      toast.error("Session expired");
       router.push("/login");
-    } catch (error: any) {
-      console.error("ERROR: ", error);
-    } finally {
-      setIsLoading(false);
     }
+  }, [email, confirmationCode, router]);
+
+  async function onSubmit(values: FormSchema) {
+    if (!confirmationCode) {
+      toast.error("Invalid confirmation code");
+      return router.push("/login");
+    }
+
+    if (!email) {
+      toast.error("Invalid email");
+      return router.push("/login");
+    }
+
+    resetPassword({
+      code: confirmationCode,
+      email: email,
+      password: values.password,
+      passwordConfirmation: values.confirmPassword,
+    });
   }
 
   return (
@@ -105,37 +93,12 @@ export default function Login() {
         </p>
       </div>
       <div className="grid gap-4">
-        <Form {...confirmForgotPasswordCodeForm}>
-          <form
-            onSubmit={confirmForgotPasswordCodeForm.handleSubmit(
-              confirmPasswordCode
-            )}
-          >
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <FormField
-                  control={confirmForgotPasswordCodeForm.control}
-                  name="confirmationCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel htmlFor="confirmationCode">
-                        Confirmation Code
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          id="confirmationCode"
-                          autoCapitalize="none"
-                          autoCorrect="off"
-                          disabled={isLoading}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={confirmForgotPasswordCodeForm.control}
+                  control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
@@ -147,7 +110,7 @@ export default function Login() {
                           type="password"
                           autoCapitalize="none"
                           autoCorrect="off"
-                          disabled={isLoading}
+                          disabled={status === "pending"}
                           {...field}
                         />
                       </FormControl>
@@ -156,7 +119,7 @@ export default function Login() {
                   )}
                 />
                 <FormField
-                  control={confirmForgotPasswordCodeForm.control}
+                  control={form.control}
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
@@ -170,7 +133,7 @@ export default function Login() {
                           type="password"
                           autoCapitalize="none"
                           autoCorrect="off"
-                          disabled={isLoading}
+                          disabled={status === "pending"}
                           {...field}
                         />
                       </FormControl>
@@ -179,8 +142,10 @@ export default function Login() {
                   )}
                 />
               </div>
-              <Button disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button disabled={status === "pending"}>
+                {status === "pending" && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Next
               </Button>
             </div>

@@ -2,11 +2,9 @@
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import "@aws-amplify/ui-react/styles.css";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
 
 import { Icons } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
@@ -29,13 +27,7 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function Login() {
-  const router = useRouter();
-
-  const { mutate: login, data, error, status } = useLogin();
-
-  useEffect(() => {
-    console.log("status: ", status);
-  }, [status]);
+  const { mutate: login, status } = useLogin();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),

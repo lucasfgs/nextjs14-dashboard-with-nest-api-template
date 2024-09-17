@@ -18,8 +18,6 @@ function getTokenFromCookies(): string | null {
 export async function validateAuthenticatedUser() {
   const token = await getTokenFromCookies();
 
-  console.log("CALLED");
-
   api.defaults.headers.Authorization = `Bearer ${token}`;
   if (!token) {
     return null;
