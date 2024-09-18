@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
@@ -6,6 +7,10 @@ export function MainNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
+  const pathname = usePathname();
+
+  console.log("pathname: ", pathname);
+
   return (
     <nav
       className={cn(
@@ -16,25 +21,46 @@ export function MainNav({
     >
       <Link
         href="/dashboard"
-        className="text-lg md:text-sm font-medium transition-colors hover:text-primary"
+        className={cn(
+          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
+          pathname === "/dashboard" ? "" : "text-muted-foreground"
+        )}
       >
         Overview
       </Link>
       <Link
         href="/dashboard"
-        className="text-lg md:text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+        className={cn(
+          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
+          pathname.includes("/customers") ? "" : "text-muted-foreground"
+        )}
       >
         Customers
       </Link>
       <Link
         href="/dashboard"
-        className="text-lg md:text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+        className={cn(
+          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
+          pathname.includes("/products") ? "" : "text-muted-foreground"
+        )}
       >
         Products
       </Link>
       <Link
+        href="/dashboard/users"
+        className={cn(
+          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
+          pathname.includes("/users") ? "" : "text-muted-foreground"
+        )}
+      >
+        Users
+      </Link>
+      <Link
         href="/dashboard"
-        className="text-lg md:text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+        className={cn(
+          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
+          pathname.includes("/settings") ? "" : "text-muted-foreground"
+        )}
       >
         Settings
       </Link>

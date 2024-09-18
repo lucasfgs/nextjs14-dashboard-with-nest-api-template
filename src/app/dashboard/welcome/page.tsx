@@ -7,7 +7,7 @@ import {
   StepMenuPreviousTrigger,
   StepMenuProgressBar,
   StepMenuStep,
-} from "@/components/custom/StepMenu";
+} from "@/components/custom/step-menu";
 
 import styles from "./styles.module.css";
 
