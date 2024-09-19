@@ -9,8 +9,6 @@ export function MainNav({
 }: React.HTMLAttributes<HTMLElement>) {
   const pathname = usePathname();
 
-  console.log("pathname: ", pathname);
-
   return (
     <nav
       className={cn(
