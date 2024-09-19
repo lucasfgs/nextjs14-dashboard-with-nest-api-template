@@ -2,7 +2,7 @@
 
 import { CalendarDateRangePicker } from "@/components/pages/dashboard/date-range-picker";
 import { Overview } from "@/components/pages/dashboard/overview";
-import Page from "@/components/pages/dashboard/page";
+import Page, { ELayout } from "@/components/pages/dashboard/page";
 import PageContent from "@/components/pages/dashboard/page/content";
 import {
   PageHeader,
@@ -22,7 +22,7 @@ import {
 export default function Dashboard() {
   return (
     <>
-      <Page>
+      <Page layout={ELayout.Full}>
         <PageHeader>
           <PageHeaderTitle>Dashboard</PageHeaderTitle>
           <PageHeaderOptions>

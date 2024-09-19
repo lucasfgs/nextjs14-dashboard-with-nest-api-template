@@ -1,6 +1,6 @@
 "use client";
 
-import Page from "@/components/pages/dashboard/page";
+import Page, { ELayout } from "@/components/pages/dashboard/page";
 import PageContent from "@/components/pages/dashboard/page/content";
 import {
   PageHeader,
@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function Users() {
   return (
     <>
-      <Page>
+      <Page layout={ELayout.Compact}>
         <PageHeader>
           <PageHeaderTitle>Users</PageHeaderTitle>
           <PageHeaderOptions>
