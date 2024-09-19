@@ -28,16 +28,14 @@ import { DataTable } from "@/components/custom/data-table";
 import { DataTablePagination } from "@/components/custom/data-table/pagination";
 import { DataTableViewOptions } from "@/components/custom/data-table/view-options";
 import { cn } from "@/lib/utils";
-
-type User = {
-  id: number;
-  name: string;
-  email: string;
-};
+import {
+  TGetAllUsersResponse,
+  useGetAllUsers,
+} from "@/services/api/users/useGetAllUsers";
 
 interface UserTableProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-const columns: ColumnDef<User>[] = [
+const columns: ColumnDef<TGetAllUsersResponse>[] = [
   {
     accessorKey: "id",
     header: ({ column }) => (
@@ -55,6 +53,16 @@ const columns: ColumnDef<User>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Email" />
     ),
+  },
+  {
+    accessorKey: "created_at",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created At" />
+    ),
+    cell: ({ row }) => {
+      const user = row.original;
+      return new Date(user.created_at).toLocaleString();
+    },
   },
   {
     id: "actions",
@@ -88,31 +96,16 @@ const columns: ColumnDef<User>[] = [
 ];
 
 export default function UserTable({ className, ...props }: UserTableProps) {
-  const [data, _setData] = useState<User[]>(() => [
-    { id: 1, name: "John Doe", email: "john.doe@example.com" },
-    { id: 2, name: "John Doe", email: "john.doe@example.com" },
-    { id: 3, name: "John Doe", email: "john.doe@example.com" },
-    { id: 4, name: "John Doe", email: "john.doe@example.com" },
-    { id: 3, name: "John Doe", email: "john.doe@example.com" },
-    { id: 4, name: "John Doe", email: "john.doe@example.com" },
-    { id: 3, name: "John Doe", email: "john.doe@example.com" },
-    { id: 4, name: "John Doe", email: "john.doe@example.com" },
-    { id: 3, name: "John Doe", email: "john.doe@example.com" },
-    { id: 4, name: "John Doe", email: "john.doe@example.com" },
-    { id: 3, name: "John Doe", email: "john.doe@example.com" },
-    { id: 4, name: "John Doe", email: "john.doe@example.com" },
-    { id: 3, name: "John Doe", email: "john.doe@example.com" },
-    { id: 4, name: "John Doe", email: "john.doe@example.com" },
-    { id: 3, name: "John Doe", email: "john.doe@example.com" },
-    { id: 4, name: "John Doe", email: "john.doe@example.com" },
-    { id: 3, name: "John Doe", email: "john.doe@example.com" },
-  ]);
+  const defaultData = React.useMemo(() => [], []);
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const { data } = useGetAllUsers();
+
   const table = useReactTable({
     columns,
-    data,
+    data: data || defaultData,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
