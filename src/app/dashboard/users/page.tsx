@@ -7,8 +7,8 @@ import {
   PageHeaderOptions,
   PageHeaderTitle,
 } from "@/components/pages/dashboard/page/header";
+import NewUser from "@/components/pages/dashboard/users/new-user";
 import UserTable from "@/components/pages/dashboard/users/user-table";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Users() {
@@ -18,7 +18,7 @@ export default function Users() {
         <PageHeader>
           <PageHeaderTitle>Users</PageHeaderTitle>
           <PageHeaderOptions>
-            <Button>New User</Button>
+            <NewUser />
           </PageHeaderOptions>
         </PageHeader>
         <PageContent>

@@ -14,7 +14,7 @@ export type TGetAllUsersResponse = {
   created_at: string;
 };
 
-const GET_ALL_USERS_QUERY_KEY = ["getAllUsersQuery"];
+export const GET_ALL_USERS_QUERY_KEY = ["getAllUsersQuery"];
 
 const getAllusers = async (): Promise<TGetAllUsersResponse[]> => {
   const { data } = await api.get("/users");
