@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import api from "@/configs/api";
+import { getAllRolesAction } from "./actions/getAllRoles";
 
 export type TGetAllRolesResponse = {
   id: string;
@@ -10,8 +10,7 @@ export type TGetAllRolesResponse = {
 const GET_ALL_ROLES_QUERY_KEY = ["getAllRolesQuery"];
 
 const getAllRoles = async (): Promise<TGetAllRolesResponse[]> => {
-  const { data } = await api.get("/roles");
-  return data;
+  return await getAllRolesAction();
 };
 
 export const useGetAllRoles = () => {
