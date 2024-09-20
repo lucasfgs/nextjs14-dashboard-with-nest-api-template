@@ -1,6 +1,6 @@
-import { useStepMenu } from "./context";
-
 import { cn } from "@/lib/utils";
+
+import { useStepMenu } from "./context";
 
 interface StepMenuProgressBarProps {
   variant: "line" | "dots";

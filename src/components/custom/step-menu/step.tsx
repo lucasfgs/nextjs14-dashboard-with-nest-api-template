@@ -1,8 +1,8 @@
 import { motion, MotionProps } from "framer-motion";
 
-import { useStepMenu } from "./context";
-
 import { cn } from "@/lib/utils";
+
+import { useStepMenu } from "./context";
 
 interface StepProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, keyof MotionProps> {
