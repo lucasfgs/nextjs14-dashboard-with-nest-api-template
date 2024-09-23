@@ -2,11 +2,9 @@
 
 import { Loader } from "lucide-react";
 import Link from "next/link";
-import * as Auth from "aws-amplify/auth";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -56,27 +54,7 @@ export default function Register() {
     },
   });
 
-  async function onSubmit(values: FormSchema) {
-    setIsLoading(true);
-    try {
-      const user = await Auth.signUp({
-        username: values.email,
-        password: values.password,
-        options: {
-          userAttributes: {},
-          autoSignIn: true,
-        },
-      });
-      if (user) {
-        router.push("/login");
-      }
-    } catch (error: any) {
-      toast.error("An account with the given email already exists.");
-      console.error("ERROR: ", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  async function onSubmit(values: FormSchema) {}
 
   return (
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">

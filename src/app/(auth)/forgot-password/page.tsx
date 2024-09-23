@@ -3,9 +3,6 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import "@aws-amplify/ui-react/styles.css";
-import * as Auth from "aws-amplify/auth";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -53,9 +50,6 @@ export default function Login() {
   const router = useRouter();
   const { mutate: forgotPassword, status } = useForgotPassword();
 
-  const [shouldConfirmPasswordCode, setShouldConfirmPasswordCode] =
-    useState<boolean>(false);
-
   const forgotPasswordForm = useForm<ForgotPasswordFormSchema>({
     resolver: zodResolver(forgotPasswodFormSchema),
     defaultValues: {
@@ -63,36 +57,10 @@ export default function Login() {
     },
   });
 
-  const confirmForgotPasswordCodeForm =
-    useForm<ConfirmForgotPasswordCodeSchema>({
-      resolver: zodResolver(confirmForgotPasswordCodeSchema),
-      defaultValues: {
-        confirmationCode: "",
-        confirmPassword: "",
-        password: "",
-      },
-      shouldUnregister: true,
-    });
-
   async function resetPassword(values: ForgotPasswordFormSchema) {
     forgotPassword({
       email: values.email,
     });
-  }
-
-  async function confirmPasswordCode(values: ConfirmForgotPasswordCodeSchema) {
-    try {
-      await Auth.confirmResetPassword({
-        confirmationCode: values.confirmationCode,
-        newPassword: values.password,
-        username: forgotPasswordForm.getValues("email"),
-      });
-
-      router.push("/login");
-    } catch (error: any) {
-      console.error("ERROR: ", error);
-    } finally {
-    }
   }
 
   return (
@@ -106,160 +74,41 @@ export default function Login() {
         </p>
       </div>
       <div className="grid gap-4">
-        {shouldConfirmPasswordCode ? (
-          <Form {...confirmForgotPasswordCodeForm}>
-            <form
-              onSubmit={confirmForgotPasswordCodeForm.handleSubmit(
-                confirmPasswordCode
-              )}
-            >
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <FormField
-                    control={forgotPasswordForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="email">Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            id="email"
-                            type="email"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                            disabled={true}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={confirmForgotPasswordCodeForm.control}
-                    name="confirmationCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="confirmationCode">
-                          Confirmation Code
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            id="confirmationCode"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                            disabled={status === "pending"}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={confirmForgotPasswordCodeForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="password">Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            id="password"
-                            placeholder="************"
-                            type="password"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                            disabled={status === "pending"}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={confirmForgotPasswordCodeForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="confirmPassword">
-                          Confirm Password
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            id="confirmPassword"
-                            placeholder="************"
-                            type="password"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                            disabled={status === "pending"}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button disabled={status === "pending"}>
-                  {status === "pending" && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        <Form {...forgotPasswordForm}>
+          <form onSubmit={forgotPasswordForm.handleSubmit(resetPassword)}>
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <FormField
+                  control={forgotPasswordForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel htmlFor="email">Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="email"
+                          type="email"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          disabled={status === "pending"}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                  Next
-                </Button>
+                />
               </div>
-            </form>
-          </Form>
-        ) : (
-          <Form {...forgotPasswordForm}>
-            <form onSubmit={forgotPasswordForm.handleSubmit(resetPassword)}>
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <FormField
-                    control={forgotPasswordForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor="email">Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            id="email"
-                            type="email"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                            disabled={status === "pending"}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button disabled={status === "pending"}>
-                  {status === "pending" && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Send
-                </Button>
-              </div>
-            </form>
-          </Form>
-        )}
+              <Button disabled={status === "pending"}>
+                {status === "pending" && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Send
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
-
-      {/* <div className="flex flex-col text-center text-sm text-muted-foreground">
-        Code not found or invalid?{" "}
-        <Button
-          variant={"secondary"}
-          size={"sm"}
-          className="mt-2"
-          onClick={() => resendCode()}
-        >
-          {status === "pending" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Resend
-        </Button>
-      </div> */}
     </div>
   );
 }
