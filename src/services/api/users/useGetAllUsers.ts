@@ -1,6 +1,6 @@
 import { useQuery, QueryOptions } from "@tanstack/react-query";
 
-import { getAllUsersAction } from "./actions/getAllUsers";
+import api from "@/configs/api";
 
 export type TGetAllUsersResponse = {
   id: number;
@@ -11,8 +11,9 @@ export type TGetAllUsersResponse = {
 
 export const GET_ALL_USERS_QUERY_KEY = ["getAllUsersQuery"];
 
-const getAllUsers = async (): Promise<TGetAllUsersResponse[]> => {
-  return await getAllUsersAction();
+export const getAllUsers = async (): Promise<TGetAllUsersResponse[]> => {
+  const { data } = await api.get("/users");
+  return data;
 };
 
 export const useGetAllUsers = (options: QueryOptions | null = null) => {

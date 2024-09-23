@@ -1,8 +1,10 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import React from "react";
 
-import { getAllUsersAction } from "@/services/api/users/actions/getAllUsers";
-import { GET_ALL_USERS_QUERY_KEY } from "@/services/api/users/useGetAllUsers";
+import {
+  GET_ALL_USERS_QUERY_KEY,
+  getAllUsers,
+} from "@/services/api/users/useGetAllUsers";
 import { getQueryClient } from "@/lib/getQueryClient";
 export default async function Hydration({
   children,
@@ -13,7 +15,7 @@ export default async function Hydration({
 
   await queryClient.prefetchQuery({
     queryKey: GET_ALL_USERS_QUERY_KEY,
-    queryFn: async () => await getAllUsersAction(),
+    queryFn: getAllUsers,
   });
 
   return (
