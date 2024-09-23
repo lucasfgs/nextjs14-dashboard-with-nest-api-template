@@ -33,7 +33,9 @@ import {
   useGetAllUsers,
 } from "@/services/api/users/useGetAllUsers";
 
-interface UserTableProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface UserTableProps extends React.HTMLAttributes<HTMLDivElement> {
+  users?: TGetAllUsersResponse[];
+}
 
 const columns: ColumnDef<TGetAllUsersResponse>[] = [
   {
@@ -95,7 +97,11 @@ const columns: ColumnDef<TGetAllUsersResponse>[] = [
   },
 ];
 
-export default function UserTable({ className, ...props }: UserTableProps) {
+export default function UserTable({
+  users,
+  className,
+  ...props
+}: UserTableProps) {
   const defaultData = React.useMemo(() => [], []);
 
   const [sorting, setSorting] = useState<SortingState>([]);

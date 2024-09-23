@@ -14,7 +14,7 @@ type AddUserBody = {
 };
 
 type AddUserResponse = {
-  access_token: string;
+  accessToken: string;
 };
 
 const ADD_USER_MUTATION_KEY = ["addUserMutation"];

@@ -1,5 +1,3 @@
-"use client";
-
 import Page, { ELayout } from "@/components/pages/dashboard/page";
 import PageContent from "@/components/pages/dashboard/page/content";
 import {
@@ -11,9 +9,11 @@ import NewUser from "@/components/pages/dashboard/users/new-user";
 import UserTable from "@/components/pages/dashboard/users/user-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function Users() {
+import Hydration from "./hydration";
+
+export default async function Users() {
   return (
-    <>
+    <Hydration>
       <Page layout={ELayout.Compact}>
         <PageHeader>
           <PageHeaderTitle>Users</PageHeaderTitle>
@@ -43,6 +43,6 @@ export default function Users() {
           </Tabs>
         </PageContent>
       </Page>
-    </>
+    </Hydration>
   );
 }

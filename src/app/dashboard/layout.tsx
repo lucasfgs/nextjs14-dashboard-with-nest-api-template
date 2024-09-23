@@ -5,8 +5,8 @@ import { validateAuthenticatedUser } from "@/utils/validateAuthenticatedUser";
 import DashboardLayout from "@/components/pages/dashboard/_layout";
 
 export const metadata: Metadata = {
-  title: "Authentication",
-  description: "Authentication page",
+  title: "Dashboard",
+  description: "Dashboard page",
 };
 
 export default async function RootLayout({

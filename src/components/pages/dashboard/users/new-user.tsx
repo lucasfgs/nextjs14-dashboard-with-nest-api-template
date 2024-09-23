@@ -1,3 +1,5 @@
+"use client";
+
 import { Loader } from "lucide-react";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";

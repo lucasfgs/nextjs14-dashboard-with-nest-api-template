@@ -12,7 +12,7 @@ type Login = {
 };
 
 type LoginResponse = {
-  access_token: string;
+  accessToken: string;
 };
 
 const LOGIN_USER_MUTATION_KEY = ["loginUserMutation"];
@@ -36,8 +36,8 @@ export const useLogin = () => {
     },
     onSuccess: (data) => {
       toast.success("Logged in successfully");
-      setAccessToken(data.access_token);
-      api.defaults.headers.Authorization = "Bearer " + data.access_token;
+      setAccessToken(data.accessToken);
+      api.defaults.headers.Authorization = "Bearer " + data.accessToken;
       router.push("/dashboard");
     },
   });
