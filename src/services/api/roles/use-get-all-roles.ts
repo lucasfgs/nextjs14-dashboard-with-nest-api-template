@@ -9,7 +9,7 @@ export type TGetAllRolesResponse = {
 
 const GET_ALL_ROLES_QUERY_KEY = ["getAllRolesQuery"];
 
-const getAllRoles = async (): Promise<TGetAllRolesResponse[]> => {
+const getAllRolesAction = async (): Promise<TGetAllRolesResponse[]> => {
   const { data } = await api.get("/roles");
   return data;
 };
@@ -17,6 +17,6 @@ const getAllRoles = async (): Promise<TGetAllRolesResponse[]> => {
 export const useGetAllRoles = () => {
   return useQuery({
     queryKey: GET_ALL_ROLES_QUERY_KEY,
-    queryFn: getAllRoles,
+    queryFn: getAllRolesAction,
   });
 };

@@ -15,14 +15,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForgotPassword } from "@/services/api/auth/useForgotPassword";
+import { useForgotPassword } from "@/services/api/auth/use-forgot-password";
 import {
   InputOTPSeparator,
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useConfirmRecoveryPasswordCode } from "@/services/api/auth/useConfirmRecoveryPasswordCode";
+import { useConfirmRecoveryPasswordCode } from "@/services/api/auth/use-confirm-recovery-password-code";
 
 const formSchema = z.object({
   confirmationCode: z.string().min(6),

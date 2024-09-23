@@ -17,7 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useLogin } from "@/services/api/auth/useLogin";
+import { useLogin } from "@/services/api/auth/use-login";
 
 const formSchema = z.object({
   email: z.string().email(),

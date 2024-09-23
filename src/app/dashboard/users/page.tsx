@@ -14,7 +14,7 @@ import Hydration from "./hydration";
 export default async function Users() {
   return (
     <Hydration>
-      <Page layout={ELayout.Compact}>
+      <Page layout={ELayout.Compact} className="relative">
         <PageHeader>
           <PageHeaderTitle>Users</PageHeaderTitle>
           <PageHeaderOptions>

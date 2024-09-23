@@ -8,6 +8,7 @@ import TeamSwitcher from "./team-switcher";
 import Transition from "./_transition";
 import { UserNav } from "./user-nav";
 import HamburgerMenu from "./hamburger-menu";
+import UpgradePlan from "./upgrade-plan";
 
 export default function DashboardLayout({
   children,
@@ -16,7 +17,7 @@ export default function DashboardLayout({
 }>) {
   return (
     <Transition>
-      <main className="flex-col md:flex">
+      <main className="flex-col md:flex relative min-h-svh">
         <div className="border-b">
           <div className="flex h-16 items-center px-4">
             <TeamSwitcher className="hidden md:flex" />
@@ -32,6 +33,7 @@ export default function DashboardLayout({
           </div>
         </div>
         {children}
+        <UpgradePlan className="absolute left-2 bottom-2 max-w-xs" />
       </main>
     </Transition>
   );

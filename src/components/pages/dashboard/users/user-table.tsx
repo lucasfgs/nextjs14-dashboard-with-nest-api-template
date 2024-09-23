@@ -28,8 +28,10 @@ import { DataTable } from "@/components/custom/data-table";
 import { DataTablePagination } from "@/components/custom/data-table/pagination";
 import { DataTableViewOptions } from "@/components/custom/data-table/view-options";
 import { cn } from "@/lib/utils";
-import { TGetAllUsersResponse } from "@/services/api/users/getAllUsers";
-import { useUsers } from "@/services/api/users";
+import {
+  TGetAllUsersResponse,
+  useGetAllUsers,
+} from "@/services/api/users/use-get-all-users";
 
 interface UserTableProps extends React.HTMLAttributes<HTMLDivElement> {
   users?: TGetAllUsersResponse[];
@@ -105,9 +107,7 @@ export default function UserTable({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const {
-    getAllUsers: { data },
-  } = useUsers();
+  const { data } = useGetAllUsers();
 
   const table = useReactTable({
     columns,

@@ -4,7 +4,7 @@ import React from "react";
 import {
   GET_ALL_USERS_QUERY_KEY,
   getAllUsersAction,
-} from "@/services/api/users/getAllUsers";
+} from "@/services/api/users/use-get-all-users";
 import { getQueryClient } from "@/lib/getQueryClient";
 export default async function Hydration({
   children,

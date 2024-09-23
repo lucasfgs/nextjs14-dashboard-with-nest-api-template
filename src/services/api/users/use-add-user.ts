@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import api from "@/configs/api";
 
-import { GET_ALL_USERS_QUERY_KEY } from "./getAllUsers";
+import { GET_ALL_USERS_QUERY_KEY } from "./use-get-all-users";
 
 type AddUserBody = {
   name: string;
@@ -26,7 +26,9 @@ const addUserAction = async (
   return data;
 };
 
-export const addUserMutation = (queryClient: QueryClient) => {
+export const useAddUser = () => {
+  const queryClient = new QueryClient();
+
   return useMutation<AddUserResponse, AxiosError, AddUserBody>({
     mutationFn: addUserAction,
     mutationKey: ADD_USER_MUTATION_KEY,

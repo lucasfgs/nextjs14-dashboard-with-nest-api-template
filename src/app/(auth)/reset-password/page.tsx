@@ -17,7 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useResetPassword } from "@/services/api/auth/useResetPassword";
+import { useResetPassword } from "@/services/api/auth/use-reset-password";
 import { useAuth } from "@/components/pages/auth/context";
 
 const confirmForgotPasswordCodeSchema = z

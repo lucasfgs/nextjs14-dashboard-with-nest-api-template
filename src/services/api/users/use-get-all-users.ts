@@ -16,7 +16,7 @@ export const getAllUsersAction = async (): Promise<TGetAllUsersResponse[]> => {
   return data;
 };
 
-export const getAllUsersQuery = () => {
+export const useGetAllUsers = () => {
   return useQuery<any, any, TGetAllUsersResponse[]>({
     queryKey: GET_ALL_USERS_QUERY_KEY,
     queryFn: getAllUsersAction,

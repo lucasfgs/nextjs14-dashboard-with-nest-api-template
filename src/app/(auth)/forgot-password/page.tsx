@@ -15,7 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForgotPassword } from "@/services/api/auth/useForgotPassword";
+import { useForgotPassword } from "@/services/api/auth/use-forgot-password";
 
 const forgotPasswodFormSchema = z.object({
   email: z.string().email(),

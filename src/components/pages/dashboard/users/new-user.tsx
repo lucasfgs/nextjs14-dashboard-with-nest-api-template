@@ -25,7 +25,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useGetAllRoles } from "@/services/api/roles/useGetAllRoles";
 import {
   Select,
   SelectContent,
@@ -33,7 +32,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUsers } from "@/services/api/users";
+import { useAddUser } from "@/services/api/users/use-add-user";
+import { useGetAllRoles } from "@/services/api/roles/use-get-all-roles";
 
 const formSchema = z.object({
   name: z.string().min(3).max(50),
@@ -55,11 +55,10 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function NewUser() {
   const [open, setOpen] = useState(false);
+
   const { data: roles } = useGetAllRoles();
 
-  const {
-    addUser: { mutateAsync, isPending },
-  } = useUsers();
+  const { mutateAsync, isPending } = useAddUser();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
