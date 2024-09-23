@@ -1,10 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { QueryClient, useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
 import api from "@/configs/api";
 
-import { GET_ALL_USERS_QUERY_KEY } from "./useGetAllUsers";
+import { GET_ALL_USERS_QUERY_KEY } from "./getAllUsers";
 
 type AddUserBody = {
   name: string;
@@ -14,21 +14,21 @@ type AddUserBody = {
 };
 
 type AddUserResponse = {
-  accessToken: string;
+  access_token: string;
 };
 
 const ADD_USER_MUTATION_KEY = ["addUserMutation"];
 
-const addUser = async (addUserData: AddUserBody): Promise<AddUserResponse> => {
+const addUserAction = async (
+  addUserData: AddUserBody
+): Promise<AddUserResponse> => {
   const { data } = await api.post("/users", addUserData);
   return data;
 };
 
-export const useAddUser = () => {
-  const queryClient = useQueryClient();
-
+export const addUserMutation = (queryClient: QueryClient) => {
   return useMutation<AddUserResponse, AxiosError, AddUserBody>({
-    mutationFn: addUser,
+    mutationFn: addUserAction,
     mutationKey: ADD_USER_MUTATION_KEY,
     onError: (error) => {
       switch (error.status) {

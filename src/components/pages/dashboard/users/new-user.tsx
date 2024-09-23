@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAddUser } from "@/services/api/users/useAddUser";
+import { useUsers } from "@/services/api/users";
 
 const formSchema = z.object({
   name: z.string().min(3).max(50),
@@ -56,7 +56,10 @@ type FormSchema = z.infer<typeof formSchema>;
 export default function NewUser() {
   const [open, setOpen] = useState(false);
   const { data: roles } = useGetAllRoles();
-  const { mutateAsync: addUser, isPending } = useAddUser();
+
+  const {
+    addUser: { mutateAsync, isPending },
+  } = useUsers();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -68,7 +71,7 @@ export default function NewUser() {
   });
 
   async function onSubmit(values: FormSchema) {
-    await addUser({
+    await mutateAsync({
       ...values,
       roleId: Number(values.role),
     });

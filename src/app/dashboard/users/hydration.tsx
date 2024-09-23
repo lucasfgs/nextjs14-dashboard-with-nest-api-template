@@ -3,8 +3,8 @@ import React from "react";
 
 import {
   GET_ALL_USERS_QUERY_KEY,
-  getAllUsers,
-} from "@/services/api/users/useGetAllUsers";
+  getAllUsersAction,
+} from "@/services/api/users/getAllUsers";
 import { getQueryClient } from "@/lib/getQueryClient";
 export default async function Hydration({
   children,
@@ -15,7 +15,7 @@ export default async function Hydration({
 
   await queryClient.prefetchQuery({
     queryKey: GET_ALL_USERS_QUERY_KEY,
-    queryFn: getAllUsers,
+    queryFn: getAllUsersAction,
   });
 
   return (
