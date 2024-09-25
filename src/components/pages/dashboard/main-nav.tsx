@@ -54,6 +54,15 @@ export function MainNav({
         Users
       </Link>
       <Link
+        href="/dashboard/roles"
+        className={cn(
+          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
+          pathname.includes("/roles") ? "" : "text-muted-foreground"
+        )}
+      >
+        Roles
+      </Link>
+      <Link
         href="/dashboard/settings"
         className={cn(
           "text-lg md:text-sm font-medium transition-colors hover:text-primary",

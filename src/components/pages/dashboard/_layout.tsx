@@ -4,7 +4,6 @@ import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 import { MainNav } from "./main-nav";
 import { Search } from "./search";
-import TeamSwitcher from "./team-switcher";
 import Transition from "./_transition";
 import { UserNav } from "./user-nav";
 import HamburgerMenu from "./hamburger-menu";
@@ -20,7 +19,6 @@ export default function DashboardLayout({
       <main className="flex-col md:flex relative min-h-svh">
         <div className="border-b">
           <div className="flex h-16 items-center px-4">
-            <TeamSwitcher className="hidden md:flex" />
             <MainNav className="mx-6" />
             <div className="hidden ml-auto md:flex items-center space-x-4">
               <Search />
