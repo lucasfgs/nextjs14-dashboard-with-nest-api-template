@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/configs/api";
 
 export type TGetAllPermissionsResponse = {
-  id: string;
+  id: number;
   name: string;
   description: string;
 };
 
-const GET_ALL_PERMISSIONS_QUERY = ["getAllPermissionsQuery"];
+export const GET_ALL_PERMISSIONS_QUERY = ["getAllPermissionsQuery"];
 
 export const getAllPermissionsAction = async (): Promise<
   TGetAllPermissionsResponse[]

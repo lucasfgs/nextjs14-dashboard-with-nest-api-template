@@ -29,7 +29,7 @@ export function PageHeaderTitle({
 }: PageHeaderTitleProps) {
   return (
     <h2
-      className={cn("text-3xl font-bold tracking-tight", className)}
+      className={cn("text-2xl font-bold tracking-tight", className)}
       {...props}
     >
       {children}

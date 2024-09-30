@@ -17,7 +17,6 @@ import useIsMobile from "@/utils/hooks/useIsMobile";
 import { Search } from "./search";
 import { MainNav } from "./main-nav";
 import { UserNav } from "./user-nav";
-import TeamSwitcher from "./team-switcher";
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -48,9 +47,7 @@ export default function HamburgerMenu() {
           </div>
         </DrawerHeader>
         <MainNav className="flex flex-col items-center justify-center mt-4" />
-        <DrawerFooter>
-          <TeamSwitcher className="w-full" />
-        </DrawerFooter>
+        <DrawerFooter></DrawerFooter>
       </DrawerContent>
     </Drawer>
   );

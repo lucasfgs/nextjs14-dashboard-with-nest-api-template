@@ -13,9 +13,7 @@ type AddUserBody = {
   roleId: number;
 };
 
-type AddUserResponse = {
-  access_token: string;
-};
+type AddUserResponse = {};
 
 const ADD_USER_MUTATION_KEY = ["addUserMutation"];
 
