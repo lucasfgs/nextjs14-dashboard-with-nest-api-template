@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getCookie, setCookie, deleteCookie } from "cookies-next";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function useTokens() {
+  const queryClient = useQueryClient();
   const [accessToken, storeAccessToken] = useState<string | null>(null);
   const [refreshToken, storeRefreshToken] = useState<string | null>(null);
 
@@ -31,6 +33,7 @@ export default function useTokens() {
 
   const removeAccessToken = () => {
     deleteCookie("accessToken");
+    queryClient.clear();
     storeAccessToken(null);
   };
 

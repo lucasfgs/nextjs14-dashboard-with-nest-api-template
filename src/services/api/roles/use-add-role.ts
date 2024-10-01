@@ -1,6 +1,7 @@
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import api from "@/configs/api";
 
@@ -23,6 +24,7 @@ const addRoleAction = async (
 };
 
 export const useAddRole = () => {
+  const router = useRouter();
   const queryClient = new QueryClient();
 
   return useMutation<AddRoleResponse, AxiosError, AddRoleBody>({
@@ -41,6 +43,8 @@ export const useAddRole = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: GET_ALL_ROLES_QUERY_KEY });
+      toast.success("Role added successfully");
+      router.push("/dashboard/roles");
     },
   });
 };

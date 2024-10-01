@@ -1,10 +1,14 @@
 "use client";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useEffect } from "react";
-import { Info } from "lucide-react";
 
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Info, Loader2 } from "lucide-react";
+
+import { useGetAllPermissions } from "@/services/api/permissions/use-get-all-permissions";
+import { useAddRole } from "@/services/api/roles/use-add-role";
+import { useGetRole } from "@/services/api/roles/use-get-role";
 import {
   Form,
   FormControl,
@@ -14,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,9 +32,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useGetAllPermissions } from "@/services/api/permissions/use-get-all-permissions";
-import { Textarea } from "@/components/ui/textarea";
-import { useAddRole } from "@/services/api/roles/use-add-role";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -37,7 +39,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useUpdateRole } from "@/services/api/roles/use-update-role";
 
+// Define validation schema using Zod
 const formSchema = z.object({
   name: z.string().min(3).max(50),
   description: z.string().min(5).max(300),
@@ -47,7 +51,7 @@ const formSchema = z.object({
         permissionId: z.number(),
         name: z.string(),
         description: z.string(),
-        view: z.boolean(),
+        read: z.boolean(),
         create: z.boolean(),
         update: z.boolean(),
         delete: z.boolean(),
@@ -58,43 +62,49 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-export default function RoleForm() {
-  const { mutate: addRole } = useAddRole();
-  const { data } = useGetAllPermissions();
+interface RoleFormProps {
+  roleId: number;
+}
+
+export default function RoleForm({ roleId }: RoleFormProps) {
+  const { mutate: addRole, isPending: addRolePending } = useAddRole();
+  const { mutate: updateRole, isPending: updateRolePending } = useUpdateRole();
+  const { data: role } = useGetRole(roleId);
+  const { data: permissions } = useGetAllPermissions();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
-      permissions: data?.map((permission) => ({
-        permissionId: permission.id,
-        name: permission.name,
-        description: permission.description,
-        view: false,
-        create: false,
-        update: false,
-        delete: false,
-      })),
+      permissions: [],
     },
   });
 
+  // When role or permissions data is available, reset the form with the updated values
   useEffect(() => {
-    if (data) {
+    if (role && permissions) {
       form.reset({
-        ...form.getValues(),
-        permissions: data.map((permission) => ({
-          permissionId: permission.id,
-          name: permission.name,
-          description: permission.description,
-          view: false,
-          create: false,
-          update: false,
-          delete: false,
-        })),
+        name: role?.name || "",
+        description: role?.description || "",
+        permissions:
+          permissions?.map((permission) => {
+            const existingPermission = role?.permissions?.find(
+              (p) => p.id === permission.id
+            );
+            return {
+              permissionId: permission.id,
+              name: permission.name,
+              description: permission.description,
+              read: existingPermission?.read || false,
+              create: existingPermission?.create || false,
+              update: existingPermission?.update || false,
+              delete: existingPermission?.delete || false,
+            };
+          }) || [],
       });
     }
-  }, [data, form]);
+  }, [role, permissions, form]);
 
   async function onSubmit(values: FormSchema) {
     const payload = {
@@ -102,15 +112,18 @@ export default function RoleForm() {
       description: values.description,
       permissions: values.permissions?.map((permission) => ({
         permissionId: permission.permissionId,
-        view: permission.view,
+        read: permission.read,
         create: permission.create,
         update: permission.update,
         delete: permission.delete,
       })),
     };
 
-    console.log("Payload: ", payload);
-    await addRole(payload);
+    if (roleId) {
+      await updateRole({ id: roleId, payload });
+    } else {
+      await addRole(payload);
+    }
   }
 
   return (
@@ -201,14 +214,14 @@ export default function RoleForm() {
                             </FormItem>
                           )}
                         />
-                        {/* View Permission */}
+                        {/* Read Permission */}
                         <FormField
                           control={form.control}
-                          name={`permissions.${index}.view`}
+                          name={`permissions.${index}.read`}
                           render={({ field }) => (
                             <FormItem className="space-y-0 flex justify-between items-center">
                               <FormLabel className="text-muted-foreground">
-                                View
+                                Read
                               </FormLabel>
                               <FormControl className="flex items-center ">
                                 <Switch
@@ -263,7 +276,18 @@ export default function RoleForm() {
             </Card>
 
             {/* Submit Button */}
-            <Button type="submit">Save</Button>
+            <Button
+              type="submit"
+              disabled={
+                addRolePending || updateRolePending || !form.formState.isValid
+              }
+            >
+              {addRolePending || updateRolePending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Save"
+              )}
+            </Button>
           </div>
         </form>
       </Form>
