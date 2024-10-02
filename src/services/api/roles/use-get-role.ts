@@ -20,13 +20,14 @@ export type TGetRoleResponse = {
 export const GET_ROLE_QUERY_KEY = ["getRoleQuery"];
 
 export const getRoleAction = async (
-  roleId: number
-): Promise<TGetRoleResponse> => {
+  roleId?: number
+): Promise<TGetRoleResponse | null> => {
+  if (!roleId) return null;
   const { data } = await api.get(`/roles/${roleId}`);
   return data;
 };
 
-export const useGetRole = (roleId: number) => {
+export const useGetRole = (roleId?: number) => {
   return useQuery({
     queryKey: GET_ROLE_QUERY_KEY,
     queryFn: () => getRoleAction(roleId),

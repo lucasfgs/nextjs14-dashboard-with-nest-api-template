@@ -63,7 +63,7 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 interface RoleFormProps {
-  roleId: number;
+  roleId?: number;
 }
 
 export default function RoleForm({ roleId }: RoleFormProps) {
@@ -83,7 +83,7 @@ export default function RoleForm({ roleId }: RoleFormProps) {
 
   // When role or permissions data is available, reset the form with the updated values
   useEffect(() => {
-    if (role && permissions) {
+    if (role || permissions) {
       form.reset({
         name: role?.name || "",
         description: role?.description || "",

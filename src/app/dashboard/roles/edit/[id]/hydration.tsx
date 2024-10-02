@@ -15,6 +15,10 @@ interface HydrationProps {
 export default async function Hydration({ children, id }: HydrationProps) {
   const queryClient = getQueryClient();
 
+  queryClient.invalidateQueries({
+    queryKey: GET_ROLE_QUERY_KEY,
+  });
+
   await queryClient.prefetchQuery({
     queryKey: GET_ROLE_QUERY_KEY,
     queryFn: () => getRoleAction(id),
