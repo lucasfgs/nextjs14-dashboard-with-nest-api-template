@@ -70,12 +70,10 @@ api.interceptors.response.use(
         const accessToken = getAccessTokenFromCookies();
         isRefreshing = false;
 
-        if (!accessToken) {
-          onRefreshed(accessToken);
+        onRefreshed(String(accessToken));
 
-          // Retry the original request with the new token
-          originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
-        }
+        // Retry the original request with the new token
+        originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         isRefreshing = false;
