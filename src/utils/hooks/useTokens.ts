@@ -1,25 +1,24 @@
 "use client";
-import { useEffect, useState } from "react";
-import { getCookie, setCookie, deleteCookie } from "cookies-next";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  getCookie,
+  setCookie,
+  deleteCookie,
+  CookieValueTypes,
+} from "cookies-next";
 
 export default function useTokens() {
-  const queryClient = useQueryClient();
-  const [accessToken, storeAccessToken] = useState<string | null>(null);
-  const [refreshToken, storeRefreshToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedAccessToken = getCookie("accessToken");
-    const storedRefreshToken = getCookie("refreshToken");
-
-    if (storedAccessToken) {
-      storeAccessToken(storedAccessToken);
+  // Try to get the access token from the cookeis and store it in the state
+  const [accessToken, storeAccessToken] = useState<CookieValueTypes | null>(
+    () => {
+      return getCookie("accessToken");
     }
-
-    if (storedRefreshToken) {
-      storeRefreshToken(storedRefreshToken);
+  );
+  const [refreshToken, storeRefreshToken] = useState<CookieValueTypes | null>(
+    () => {
+      return getCookie("refreshToken");
     }
-  }, []);
+  );
 
   const setAccessToken = (accessToken: string) => {
     setCookie("accessToken", accessToken);
@@ -33,7 +32,6 @@ export default function useTokens() {
 
   const removeAccessToken = () => {
     deleteCookie("accessToken");
-    queryClient.clear();
     storeAccessToken(null);
   };
 

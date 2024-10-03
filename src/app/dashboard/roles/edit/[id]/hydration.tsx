@@ -16,11 +16,11 @@ export default async function Hydration({ children, id }: HydrationProps) {
   const queryClient = getQueryClient();
 
   queryClient.invalidateQueries({
-    queryKey: GET_ROLE_QUERY_KEY,
+    queryKey: [GET_ROLE_QUERY_KEY, String(id)],
   });
 
   await queryClient.prefetchQuery({
-    queryKey: GET_ROLE_QUERY_KEY,
+    queryKey: [GET_ROLE_QUERY_KEY, String(id)],
     queryFn: () => getRoleAction(id),
   });
 

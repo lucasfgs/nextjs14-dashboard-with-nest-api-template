@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
-import { validateAuthenticatedUser } from "@/utils/validateAuthenticatedUser";
 import DashboardLayout from "@/components/pages/dashboard/_layout";
 
 export const metadata: Metadata = {
@@ -14,11 +12,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const authenticatedUser = await validateAuthenticatedUser();
+  // const authenticatedUser = await validateAuthenticatedUser();
 
-  if (!authenticatedUser) {
-    redirect("/login");
-  }
+  // if (!authenticatedUser) {
+  //   redirect("/login");
+  // }
 
   return <DashboardLayout>{children}</DashboardLayout>;
 }

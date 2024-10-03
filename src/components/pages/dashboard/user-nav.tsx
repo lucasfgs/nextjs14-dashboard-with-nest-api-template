@@ -22,10 +22,11 @@ export function UserNav({
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
   const router = useRouter();
-  const { removeAccessToken } = useTokens();
+  const { removeAccessToken, removeRefreshToken } = useTokens();
 
   async function signOut() {
     removeAccessToken();
+    removeRefreshToken();
     router.push("/login");
   }
   return (

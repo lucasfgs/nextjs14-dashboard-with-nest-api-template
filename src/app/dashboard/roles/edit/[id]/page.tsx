@@ -1,22 +1,20 @@
-import { AppProps } from "next/app";
-
-import Page, { ELayout } from "@/components/pages/dashboard/page";
 import PageContent from "@/components/pages/dashboard/page/content";
 import {
   PageHeader,
   PageHeaderTitle,
 } from "@/components/pages/dashboard/page/header";
 import RoleForm from "@/components/pages/dashboard/roles/role-form";
+import Page, { ELayout } from "@/components/pages/dashboard/page";
 
 import Hydration from "./hydration";
 
-interface RoleProps extends AppProps {
+interface RoleProps {
   params: {
     id: string;
   };
 }
 
-export default async function Role({ params }: RoleProps) {
+const Role = async ({ params }: RoleProps) => {
   return (
     <Hydration id={Number(params.id)}>
       <Page layout={ELayout.Compact} className="relative">
@@ -29,4 +27,6 @@ export default async function Role({ params }: RoleProps) {
       </Page>
     </Hydration>
   );
-}
+};
+
+export default Role;

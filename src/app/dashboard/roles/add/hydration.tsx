@@ -14,7 +14,7 @@ export default async function Hydration({
 }) {
   const queryClient = getQueryClient();
 
-  queryClient.setQueryData(GET_ROLE_QUERY_KEY, null);
+  queryClient.setQueryData([GET_ROLE_QUERY_KEY], null);
 
   await queryClient.prefetchQuery({
     queryKey: GET_ALL_PERMISSIONS_QUERY,
