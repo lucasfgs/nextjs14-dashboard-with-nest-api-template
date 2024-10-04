@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { setTokensInCookies } from "@/utils/setTokensInCookies";
+
 export async function POST(request: NextRequest) {
   const { email, password } = await request.json();
 
@@ -16,21 +18,7 @@ export async function POST(request: NextRequest) {
     // Set accessToken in a readable cookie and refreshToken in HttpOnly cookie
     const res = NextResponse.json({ message: "Login successful" });
 
-    // Store the accessToken in a client-readable cookie
-    res.cookies.set("accessToken", accessToken, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24, // 1 day
-    });
-
-    // Store the refreshToken in an HTTP-only cookie (server-only)
-    res.cookies.set("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-    });
+    setTokensInCookies(res, { accessToken, refreshToken });
 
     return res;
   } catch (error) {

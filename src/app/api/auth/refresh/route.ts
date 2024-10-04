@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+import { setTokensInCookies } from "@/utils/setTokensInCookies";
+
 export async function POST() {
   const cookieStore = cookies();
   const refreshToken = cookieStore.get("refreshToken")?.value;
@@ -33,20 +35,9 @@ export async function POST() {
 
     const res = NextResponse.json({ message: "Token refreshed" });
 
-    // Update accessToken in cookies
-    res.cookies.set("accessToken", data.accessToken, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24, // 1 day
-    });
-
-    // Update refreshToken in cookies
-    res.cookies.set("refreshToken", data.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+    setTokensInCookies(res, {
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
     });
 
     return res;
