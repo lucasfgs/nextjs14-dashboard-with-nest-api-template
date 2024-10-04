@@ -10,6 +10,7 @@ import {
   PageHeaderTitle,
 } from "@/components/pages/dashboard/page/header";
 import { RecentSales } from "@/components/pages/dashboard/recent-sales";
+import { useAuthentication } from "@/components/providers/authentication";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +21,8 @@ import {
 } from "@/components/ui/card";
 
 export default function Dashboard() {
+  const { permissions } = useAuthentication();
+
   return (
     <>
       <Page layout={ELayout.Full}>
@@ -31,6 +34,7 @@ export default function Dashboard() {
           </PageHeaderOptions>
         </PageHeader>
         <PageContent>
+          {JSON.stringify(permissions)}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

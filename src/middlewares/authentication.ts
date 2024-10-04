@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import cookie from "cookie";
-import { jwtVerify } from "jose";
+import { jwtVerify, decodeJwt } from "jose"; // Import decode to extract user info
 
 import { setTokensInCookies } from "@/utils/setTokensInCookies";
 
@@ -14,13 +14,21 @@ export async function authenticationMiddleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  const response = NextResponse.next();
+
   try {
     await jwtVerify(
       accessToken,
       new TextEncoder().encode(process.env.JWT_SECRET)
     ); // Verify the JWT token
 
-    return NextResponse.next(); // Token is valid, proceed
+    // Decode the token to get user info
+    const user = decodeJwt(accessToken);
+
+    // Set user information in a custom response header
+    response.headers.set("X-Authenticated-User", JSON.stringify(user));
+
+    return response; // Proceed with the response including user info
   } catch (error) {
     if ((error as Error).name === "JWTExpired") {
       if (!refreshToken) {
@@ -65,15 +73,18 @@ export async function authenticationMiddleware(request: NextRequest) {
         }
 
         // Update the cookies with the new tokens
-        const response = NextResponse.next();
-
         setTokensInCookies(response, {
           accessToken: newAccessToken,
           refreshToken: newRefreshToken,
         });
 
+        // Decode the new access token to get user info
+        const user = decodeJwt(newAccessToken);
+        response.headers.set("X-Authenticated-User", JSON.stringify(user));
+
         return response;
       } catch (refreshError) {
+        console.log("refreshError: ", refreshError);
         return NextResponse.redirect(new URL("/login", request.url));
       }
     }

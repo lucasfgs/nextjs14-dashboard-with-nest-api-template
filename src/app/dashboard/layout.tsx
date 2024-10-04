@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 import DashboardLayout from "@/components/pages/dashboard/_layout";
+
+import { Provider } from "./provider";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -12,11 +15,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const authenticatedUser = await validateAuthenticatedUser();
+  const headersList = headers();
+  const authenticatedUser = JSON.parse(
+    headersList.get("X-Authenticated-User") || "{}"
+  );
 
-  // if (!authenticatedUser) {
-  //   redirect("/login");
-  // }
-
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <Provider authenticatedUser={authenticatedUser}>
+      <DashboardLayout>{children}</DashboardLayout>
+    </Provider>
+  );
 }
