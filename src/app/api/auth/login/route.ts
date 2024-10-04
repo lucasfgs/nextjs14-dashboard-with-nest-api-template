@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     // Store the accessToken in a client-readable cookie
     res.cookies.set("accessToken", accessToken, {
       httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 24, // 1 day
     });
@@ -26,6 +27,7 @@ export async function POST(request: NextRequest) {
     // Store the refreshToken in an HTTP-only cookie (server-only)
     res.cookies.set("refreshToken", refreshToken, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });

@@ -36,6 +36,7 @@ export async function POST() {
     // Update accessToken in cookies
     res.cookies.set("accessToken", data.accessToken, {
       httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 24, // 1 day
     });
@@ -43,6 +44,7 @@ export async function POST() {
     // Update refreshToken in cookies
     res.cookies.set("refreshToken", data.refreshToken, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
