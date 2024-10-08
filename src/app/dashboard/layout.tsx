@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 
 import DashboardLayout from "@/components/pages/dashboard/_layout";
+import { getAuthenticatedUser } from "@/utils/getAuthenticatedUser";
 
 import { Provider } from "./provider";
 
@@ -15,10 +15,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = headers();
-  const authenticatedUser = JSON.parse(
-    headersList.get("X-Authenticated-User") || "{}"
-  );
+  const authenticatedUser = await getAuthenticatedUser();
 
   return (
     <Provider authenticatedUser={authenticatedUser}>

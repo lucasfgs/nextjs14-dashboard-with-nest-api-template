@@ -84,7 +84,6 @@ export async function authenticationMiddleware(request: NextRequest) {
 
         return response;
       } catch (refreshError) {
-        console.log("refreshError: ", refreshError);
         return NextResponse.redirect(new URL("/login", request.url));
       }
     }

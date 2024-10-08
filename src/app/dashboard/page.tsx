@@ -1,5 +1,3 @@
-"use client";
-
 import { CalendarDateRangePicker } from "@/components/pages/dashboard/date-range-picker";
 import { Overview } from "@/components/pages/dashboard/overview";
 import Page, { ELayout } from "@/components/pages/dashboard/page";
@@ -10,7 +8,6 @@ import {
   PageHeaderTitle,
 } from "@/components/pages/dashboard/page/header";
 import { RecentSales } from "@/components/pages/dashboard/recent-sales";
-import { useAuthentication } from "@/components/providers/authentication";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,9 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function Dashboard() {
-  const { permissions } = useAuthentication();
-
+export default async function Dashboard() {
   return (
     <>
       <Page layout={ELayout.Full}>
@@ -34,7 +29,6 @@ export default function Dashboard() {
           </PageHeaderOptions>
         </PageHeader>
         <PageContent>
-          {JSON.stringify(permissions)}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

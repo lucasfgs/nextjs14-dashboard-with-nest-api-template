@@ -5,6 +5,7 @@ import {
 } from "@/components/pages/dashboard/page/header";
 import RoleForm from "@/components/pages/dashboard/roles/role-form";
 import Page, { ELayout } from "@/components/pages/dashboard/page";
+import { EPermission, EPermissionType } from "@/configs/permissions";
 
 import Hydration from "./hydration";
 
@@ -14,10 +15,17 @@ interface RoleProps {
   };
 }
 
-const Role = async ({ params }: RoleProps) => {
+const RolesEdit = async ({ params }: RoleProps) => {
   return (
     <Hydration id={Number(params.id)}>
-      <Page layout={ELayout.Compact} className="relative">
+      <Page
+        layout={ELayout.Compact}
+        className="relative"
+        permission={{
+          name: EPermission.ROLES,
+          type: EPermissionType.UPDATE,
+        }}
+      >
         <PageHeader>
           <PageHeaderTitle>Edit Role</PageHeaderTitle>
         </PageHeader>
@@ -29,4 +37,4 @@ const Role = async ({ params }: RoleProps) => {
   );
 };
 
-export default Role;
+export default RolesEdit;

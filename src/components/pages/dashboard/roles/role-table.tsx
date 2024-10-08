@@ -42,6 +42,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useDeleteRole } from "@/services/api/roles/use-delete-role";
+import { useCanAccess } from "@/utils/hooks/useCanAccess";
+import { EPermission, EPermissionType } from "@/configs/permissions";
 
 interface RoleTableProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -52,6 +54,8 @@ export default function RoleTable({ className, ...props }: RoleTableProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const { mutate: deleteRole } = useDeleteRole();
   const { data } = useGetAllRoles();
+  const canUpdateRole = useCanAccess(EPermission.ROLES, EPermissionType.UPDATE);
+  const canDeleteRole = useCanAccess(EPermission.ROLES, EPermissionType.DELETE);
 
   const columns: ColumnDef<TGetAllRolesResponse>[] = [
     {
@@ -100,22 +104,26 @@ export default function RoleTable({ className, ...props }: RoleTableProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <Link
-                    href={`/dashboard/roles/edit/${role.id}`}
-                    className="w-full h-full"
+                {canUpdateRole && (
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/dashboard/roles/edit/${role.id}`}
+                      className="w-full h-full"
+                    >
+                      Edit
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {canDeleteRole && (
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setIsAlertOpen(true);
+                      setIsDropdownOpen(false);
+                    }}
                   >
-                    Edit
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => {
-                    setIsAlertOpen(true);
-                    setIsDropdownOpen(false);
-                  }}
-                >
-                  Delete
-                </DropdownMenuItem>
+                    Delete
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -141,6 +149,11 @@ export default function RoleTable({ className, ...props }: RoleTableProps) {
       },
     },
   ];
+
+  // If cannot update and delete role, hide the actions column from the table
+  if (!canUpdateRole && !canDeleteRole) {
+    columns.pop();
+  }
 
   const table = useReactTable({
     columns,

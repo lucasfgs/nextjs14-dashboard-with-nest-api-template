@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 import useSocket from "@/services/socket/use-socket";
 
-type TPermission = {
+export type TPermission = {
   name: string;
   create: boolean;
   read: boolean;
@@ -46,7 +46,6 @@ export const AuthenticationProvider: React.FC<AuthentcationProviderProps> = ({
 
   useEffect(() => {
     listenToEvent("roles:update", (data: { permissions: TPermission[] }) => {
-      console.log("ROLES UPDATED: ", data);
       setPermissions(data.permissions);
     });
   }, [listenToEvent]);

@@ -25,15 +25,6 @@ const useSocket = <T = any>(): UseSocketReturn<T> => {
       setError(err);
     });
 
-    socket.on("message", (message: T) => {
-      console.log("Message received:", message);
-    });
-
-    // listen to any other events here
-    socket.on("event", (data: any) => {
-      console.log("Event received:", data);
-    });
-
     return () => {
       // Cleanup all the listeners when the component unmounts
       Object.keys(currentListeners).forEach((eventName) => {
