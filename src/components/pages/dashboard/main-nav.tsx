@@ -2,6 +2,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import { navigation } from "@/configs/navigation";
 
 export function MainNav({
   className,
@@ -17,60 +18,18 @@ export function MainNav({
       )}
       {...props}
     >
-      <Link
-        href="/dashboard"
-        className={cn(
-          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
-          pathname === "/dashboard" ? "" : "text-muted-foreground"
-        )}
-      >
-        Overview
-      </Link>
-      <Link
-        href="/dashboard"
-        className={cn(
-          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
-          pathname.includes("/customers") ? "" : "text-muted-foreground"
-        )}
-      >
-        Customers
-      </Link>
-      <Link
-        href="/dashboard"
-        className={cn(
-          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
-          pathname.includes("/products") ? "" : "text-muted-foreground"
-        )}
-      >
-        Products
-      </Link>
-      <Link
-        href="/dashboard/users"
-        className={cn(
-          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
-          pathname.includes("/users") ? "" : "text-muted-foreground"
-        )}
-      >
-        Users
-      </Link>
-      <Link
-        href="/dashboard/roles"
-        className={cn(
-          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
-          pathname.includes("/roles") ? "" : "text-muted-foreground"
-        )}
-      >
-        Roles
-      </Link>
-      <Link
-        href="/dashboard/settings"
-        className={cn(
-          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
-          pathname.includes("/settings") ? "" : "text-muted-foreground"
-        )}
-      >
-        Settings
-      </Link>
+      {navigation.map((item) => (
+        <Link
+          key={item.link}
+          href={item.link}
+          className={cn(
+            "text-lg md:text-sm font-medium transition-colors hover:text-primary",
+            pathname.includes(item.link) ? "" : "text-muted-foreground"
+          )}
+        >
+          {item.title}
+        </Link>
+      ))}
     </nav>
   );
 }
