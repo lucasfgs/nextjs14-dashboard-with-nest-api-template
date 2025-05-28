@@ -1,36 +1,141 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Frontend Application
 
-## Getting Started
+A Next.js-based frontend application with authentication, role-based access control, and modern UI components. This is part of a full-stack application with a [NestJS backend](https://github.com/lucasfgs/nestjs-template).
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 🔐 Secure authentication with JWT and refresh tokens
+- 🎨 Modern UI with Tailwind CSS
+- 🔄 Automatic token refresh handling
+- 🍪 Cookie-based token management
+- 🛡️ Protected routes and middleware
+- 📱 Responsive design
+- 🔍 TypeScript for better development experience
+- 🧩 Modular component architecture
+
+## Prerequisites
+
+- Node.js (v16 or higher)
+- Yarn package manager
+- Backend API running (see backend README)
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+# API Configuration
+NEXT_PUBLIC_API_URL="http://localhost:4000"
+APP_PREFIX=""
+
+# Authentication
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-nextauth-secret"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+$ yarn install
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+# Run development server
+$ yarn dev
+```
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/                    # Next.js 13+ app directory
+│   ├── (auth)/            # Authentication routes
+│   │   ├── login/         # Login page
+│   │   └── ...
+│   ├── api/               # API routes
+│   └── ...
+├── components/            # Reusable components
+│   ├── ui/               # UI components
+│   └── ...
+├── configs/              # Configuration files
+│   ├── api.ts           # API client configuration
+│   └── ...
+├── middlewares/          # Next.js middlewares
+│   └── authentication.ts # Auth middleware
+└── utils/               # Utility functions
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Authentication Flow
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+1. **Login**
+   - User submits credentials
+   - Backend validates and returns tokens
+   - Tokens are stored in cookies
+   - Access token is used for API requests
 
-## Deploy on Vercel
+2. **Token Refresh**
+   - Automatic refresh on 401 responses
+   - Uses refresh token from cookies
+   - Updates access token cookie
+   - Retries failed request
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **Protected Routes**
+   - Middleware checks authentication
+   - Redirects to login if not authenticated
+   - Passes user info via headers
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## API Integration
+
+The frontend uses a custom API client that:
+- Handles authentication automatically
+- Manages token refresh
+- Provides type-safe API calls
+- Handles errors consistently
+
+Example usage:
+```typescript
+import api from '@/configs/api';
+
+// Make authenticated request
+const { data } = await api.get('/protected-route');
+```
+
+## Development
+
+```bash
+# Start development server
+$ yarn dev
+
+# Build for production
+$ yarn build
+
+# Start production server
+$ yarn start
+
+# Run tests
+$ yarn test
+```
+
+## Styling
+
+- Tailwind CSS for utility-first styling
+- Custom components for consistent UI
+- Responsive design patterns
+- Dark mode support
+
+## Best Practices
+
+- TypeScript for type safety
+- ESLint for code quality
+- Prettier for code formatting
+- Husky for pre-commit hooks
+
+## Contributing
+
+1. Create a feature branch
+2. Make your changes
+3. Run tests and linting
+4. Submit a pull request
+
+## License
+
+This project is [MIT licensed](LICENSE).
