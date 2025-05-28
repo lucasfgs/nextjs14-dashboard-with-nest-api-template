@@ -27,10 +27,6 @@ Create a `.env.local` file in the root directory with the following variables:
 # API Configuration
 NEXT_PUBLIC_API_URL="http://localhost:4000"
 APP_PREFIX=""
-
-# Authentication
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-nextauth-secret"
 ```
 
 ## Installation
