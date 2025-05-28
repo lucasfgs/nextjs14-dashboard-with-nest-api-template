@@ -1,32 +1,30 @@
 import { cookies } from "next/headers";
 
-import api from "@/configs/api";
-
-function getTokenFromCookies(): string | null {
-  const cookieStore = cookies();
-
-  const token = cookieStore.get("accessToken");
-
-  if (!token) {
-    return null;
-  }
-
-  return token.value;
+export interface IAuthenticatedUser {
+  sub: string;
+  role: string;
+  permissions: string[];
 }
 
-export async function validateAuthenticatedUser() {
-  const token = await getTokenFromCookies();
-
-  api.defaults.headers.Authorization = `Bearer ${token}`;
-  if (!token) {
-    return null;
-  }
+export async function validateAuthenticatedUser(): Promise<IAuthenticatedUser | null> {
+  const accessToken = cookies().get("accessToken")?.value;
 
   try {
-    const { data: authenticatedUser } = await api.get("/me");
+    const response = await fetch(`${process.env.API_URL}/auth/me`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      credentials: "include",
+    });
 
-    return authenticatedUser;
-  } catch (error) {
+    if (!response.ok) {
+      throw new Error("Unauthorized");
+    }
+
+    const user = await response.json();
+    return user;
+  } catch (e) {
     return null;
   }
 }

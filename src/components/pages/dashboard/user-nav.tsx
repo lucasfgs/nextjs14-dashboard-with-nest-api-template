@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,19 +13,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import useTokens from "@/utils/hooks/useTokens";
+import { useLogout } from "@/services/api/auth/use-logout";
 
 export function UserNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const router = useRouter();
-  const { removeAccessToken, removeRefreshToken } = useTokens();
+  const { mutate: logout } = useLogout();
 
   async function signOut() {
-    removeAccessToken();
-    removeRefreshToken();
-    router.push("/login");
+    logout();
   }
   return (
     <DropdownMenu>

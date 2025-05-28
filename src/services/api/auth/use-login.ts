@@ -1,49 +1,55 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import api from "@/configs/api";
-import useTokens from "@/utils/hooks/useTokens";
 
-type Login = {
+export type TLoginResponse = {
+  accessToken: string;
+  user: {
+    id: string;
+    email: string;
+    role: string;
+    permissions: string[];
+  };
+};
+
+type LoginPayload = {
   email: string;
   password: string;
 };
 
-export type TLoginResponse = {
-  accessToken: string;
-  refreshToken: string;
-};
-
 const LOGIN_USER_MUTATION_KEY = ["loginUserMutation"];
 
-const login = async (loginData: Login): Promise<TLoginResponse> => {
-  const { data } = await axios.post(`/api/auth/login`, loginData);
+const loginAction = async (
+  loginData: LoginPayload
+): Promise<TLoginResponse> => {
+  const { data } = await api.post<TLoginResponse>("/auth/login", loginData);
   return data;
 };
 
-export const useLogin = () => {
-  const { setAccessToken, setRefreshToken } = useTokens();
+export function useLogin() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  return useMutation<TLoginResponse, AxiosError, Login>({
-    mutationFn: login,
+  return useMutation<TLoginResponse, AxiosError, LoginPayload>({
     mutationKey: LOGIN_USER_MUTATION_KEY,
+    mutationFn: loginAction,
+
     onError: (error) => {
-      if (error.status === 401) {
+      if (error.response?.status === 401) {
         toast.error("Invalid email or password");
+      } else {
+        toast.error("An unexpected error occurred");
       }
     },
-    onSuccess: (data) => {
-      toast.success("Logged in successfully");
-      // setAccessToken(data.accessToken);
-      // setRefreshToken(data.refreshToken);
-      api.defaults.headers.Authorization = "Bearer " + data.accessToken;
 
+    onSuccess: (data) => {
       queryClient.clear();
+      toast.success("Logged in successfully");
       router.push("/dashboard");
+      router.refresh();
     },
   });
-};
+}
