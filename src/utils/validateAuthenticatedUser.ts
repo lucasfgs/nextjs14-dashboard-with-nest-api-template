@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import api from "@/configs/api";
 
 export interface IAuthenticatedUser {
   sub: string;
@@ -7,23 +7,12 @@ export interface IAuthenticatedUser {
 }
 
 export async function validateAuthenticatedUser(): Promise<IAuthenticatedUser | null> {
-  const accessToken = cookies().get("accessToken")?.value;
-
   try {
-    const response = await fetch(`${process.env.API_URL}/auth/me`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      credentials: "include",
-    });
+    const user = await api.get("/auth/me");
 
-    if (!response.ok) {
-      throw new Error("Unauthorized");
-    }
+    console.log("user", user);
 
-    const user = await response.json();
-    return user;
+    return user.data;
   } catch (e) {
     return null;
   }

@@ -63,7 +63,6 @@ export async function request<T = any>(
   if (!isBrowser) {
     // ── SERVER SIDE ──
 
-    // 1) Conditionally import next/headers to collect cookies
     let cookieHeader = "";
     try {
       // Works only in App Router server components
@@ -77,12 +76,11 @@ export async function request<T = any>(
       /* no-op */
     }
 
-    // 2) Parse cookies for tokens
     const parsed = cookie.parse(cookieHeader || "");
     const accessToken = parsed.accessToken;
 
     // 3) Call the actual backend via Next.js proxy
-    const res = await fetch(`/api${path}`, {
+    const res = await fetch(`${process.env.API_URL}${path}`, {
       method,
       headers: {
         "Content-Type": "application/json",
@@ -123,19 +121,19 @@ export async function request<T = any>(
 // Mirror common axios methods
 const api = {
   request,
-  get: <T>(p: string, h?: Record<string, string>) =>
+  get: <T = any>(p: string, h?: Record<string, string>) =>
     request<T>(p, { method: "GET", headers: h }),
-  post: <T>(p: string, b?: any, h?: Record<string, string>) =>
+  post: <T = any>(p: string, b?: any, h?: Record<string, string>) =>
     request<T>(p, { method: "POST", body: b, headers: h }),
-  put: <T>(p: string, b?: any, h?: Record<string, string>) =>
+  put: <T = any>(p: string, b?: any, h?: Record<string, string>) =>
     request<T>(p, { method: "PUT", body: b, headers: h }),
-  patch: <T>(p: string, b?: any, h?: Record<string, string>) =>
+  patch: <T = any>(p: string, b?: any, h?: Record<string, string>) =>
     request<T>(p, { method: "PATCH", body: b, headers: h }),
-  delete: <T>(p: string, h?: Record<string, string>) =>
+  delete: <T = any>(p: string, h?: Record<string, string>) =>
     request<T>(p, { method: "DELETE", headers: h }),
-  options: <T>(p: string, h?: Record<string, string>) =>
+  options: <T = any>(p: string, h?: Record<string, string>) =>
     request<T>(p, { method: "OPTIONS", headers: h }),
-  head: <T>(p: string, h?: Record<string, string>) =>
+  head: <T = any>(p: string, h?: Record<string, string>) =>
     request<T>(p, { method: "HEAD", headers: h }),
 };
 
