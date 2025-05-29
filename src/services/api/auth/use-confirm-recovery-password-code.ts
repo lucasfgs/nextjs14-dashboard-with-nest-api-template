@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -16,8 +16,8 @@ const CONFIRM_RECOVERY_PASSWORD_MUTATION_KEY = ["forgotPasswordMutation"];
 const confirmRecoveryPasswordCode = async ({
   email,
   confirmationCode,
-}: RecoveryConfirmPasswordCode) => {
-  return await api.post("/password/code/verify", {
+}: RecoveryConfirmPasswordCode): Promise<void> => {
+  await api.post("/password/code/verify", {
     email,
     code: confirmationCode,
   });
@@ -25,10 +25,9 @@ const confirmRecoveryPasswordCode = async ({
 
 export const useConfirmRecoveryPasswordCode = () => {
   const router = useRouter();
-
   const { setEmail, setConfirmationCode } = useAuth();
 
-  return useMutation<AxiosResponse, AxiosError, RecoveryConfirmPasswordCode>({
+  return useMutation<void, AxiosError, RecoveryConfirmPasswordCode>({
     mutationFn: confirmRecoveryPasswordCode,
     mutationKey: CONFIRM_RECOVERY_PASSWORD_MUTATION_KEY,
     onError: (error) => {
@@ -39,7 +38,6 @@ export const useConfirmRecoveryPasswordCode = () => {
         case 410:
           toast.error("Code expired");
           break;
-
         default:
           toast.error("An error occurred while verifying the code");
           break;

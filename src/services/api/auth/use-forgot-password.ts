@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
@@ -13,8 +13,10 @@ type ForgotPassword = {
 
 const FORGOT_PASSWORD_MUTATION_KEY = ["forgotPasswordMutation"];
 
-const forgotPassword = async (forgotPasswordData: ForgotPassword) => {
-  return await api.post("/password/forgot", forgotPasswordData);
+const forgotPassword = async (
+  forgotPasswordData: ForgotPassword
+): Promise<void> => {
+  await api.post("/password/forgot", forgotPasswordData);
 };
 
 export const useForgotPassword = () => {
@@ -23,7 +25,7 @@ export const useForgotPassword = () => {
 
   const createQueryString = useCallback(createQueryStringRaw, [searchParams]);
 
-  return useMutation<AxiosResponse, AxiosError, ForgotPassword>({
+  return useMutation<void, AxiosError, ForgotPassword>({
     mutationFn: forgotPassword,
     mutationKey: FORGOT_PASSWORD_MUTATION_KEY,
     onError: (error) => {

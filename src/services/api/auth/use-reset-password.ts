@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -15,8 +15,10 @@ type ResetPassword = {
 
 const RESET_PASSWORD_MUTATION_KEY = ["resetPasswordMutation"];
 
-const resetPassword = async (resetPasswordData: ResetPassword) => {
-  return await api.post("/password/reset", resetPasswordData);
+const resetPassword = async (
+  resetPasswordData: ResetPassword
+): Promise<void> => {
+  await api.post("/password/reset", resetPasswordData);
 };
 
 export const useResetPassword = () => {
@@ -24,7 +26,7 @@ export const useResetPassword = () => {
 
   const { setEmail, setConfirmationCode } = useAuth();
 
-  return useMutation<AxiosResponse, AxiosError, ResetPassword>({
+  return useMutation<void, AxiosError, ResetPassword>({
     mutationFn: resetPassword,
     mutationKey: RESET_PASSWORD_MUTATION_KEY,
     onError: (error) => {
