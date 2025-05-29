@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { IAuthenticatedUser } from "@/components/providers/authentication";
 
 export async function getAuthenticatedUser(): Promise<IAuthenticatedUser | null> {
-  const headersList = headers();
+  const headersList = await headers();
 
   if (!headersList.get("X-Authenticated-User")) return null;
 

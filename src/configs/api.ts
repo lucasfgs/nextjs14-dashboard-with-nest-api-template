@@ -122,8 +122,9 @@ export async function request<T = any>(
   let cookieHeader = "";
   try {
     const { cookies } = require("next/headers");
-    cookieHeader = cookies()
-      .getAll()
+    const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+    cookieHeader = allCookies
       .map((c: any) => `${c.name}=${c.value}`)
       .join("; ");
   } catch {

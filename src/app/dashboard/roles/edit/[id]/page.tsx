@@ -10,12 +10,13 @@ import { EPermission, EPermissionType } from "@/configs/permissions";
 import Hydration from "./hydration";
 
 interface RoleProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-const RolesEdit = async ({ params }: RoleProps) => {
+const RolesEdit = async (props: RoleProps) => {
+  const params = await props.params;
   return (
     <Hydration id={Number(params.id)}>
       <Page
