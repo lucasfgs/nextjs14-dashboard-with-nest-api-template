@@ -6,8 +6,6 @@ import React, {
 } from "react";
 import { io, Socket } from "socket.io-client";
 
-import { getAccessTokenFromCookies } from "@/utils/getAccessTokenFromCookies";
-
 export const WebSocketContext = createContext<Socket | null>(null);
 
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -18,15 +16,11 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
   useLayoutEffect(() => {
     let socketInstance: Socket;
     async function getSocket() {
-      const token = await getAccessTokenFromCookies();
-
       // Create a socket connection
       socketInstance = io("http://localhost:4000", {
         autoConnect: true,
         transports: ["websocket", "polling"],
-        auth: {
-          token,
-        },
+        withCredentials: true,
       });
 
       setSocket(socketInstance);

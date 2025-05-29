@@ -1,64 +1,65 @@
+// src/middleware/authentication.ts
 import { NextRequest, NextResponse } from "next/server";
-import cookie from "cookie";
+import { parse } from "cookie";
+import { jwtVerify, JWTPayload } from "jose";
+
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
 
 export async function authenticationMiddleware(request: NextRequest) {
-  const { nextUrl, headers } = request;
+  const { headers, nextUrl } = request;
   const loginUrl = new URL(`${process.env.APP_PREFIX}/login`, nextUrl);
 
-  // Parse the refreshToken
+  // Parse incoming cookies
   const cookieHeader = headers.get("cookie") || "";
-  const { refreshToken, accessToken } = cookie.parse(cookieHeader);
+  const { accessToken, refreshToken } = parse(cookieHeader);
 
-  // If no refreshToken cookie → redirect to login
+  // If we have an accessToken, verify it locally
+  if (accessToken) {
+    try {
+      const { payload } = await jwtVerify(accessToken, SECRET);
+      // Valid → forward and attach user payload
+      const response = NextResponse.next();
+      response.headers.set(
+        "x-authenticated-user",
+        JSON.stringify(payload as JWTPayload)
+      );
+      return response;
+    } catch (error) {
+      // Token invalid or expired → fall through to refresh logic
+    }
+  }
+
+  // No valid accessToken → must have a refreshToken
   if (!refreshToken) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // If we have an accessToken, try to validate it first
-  if (accessToken) {
-    try {
-      const meResponse = await fetch(`${process.env.API_URL}/auth/me`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        credentials: "include",
-      });
+  // Attempt silent refresh
+  const refreshResponse = await fetch(`${process.env.API_URL}/auth/refresh`, {
+    method: "POST",
+    headers: { Cookie: cookieHeader },
+    credentials: "include",
+  });
 
-      if (meResponse.ok) {
-        const user = await meResponse.json();
-        const response = NextResponse.next();
-        response.headers.set("x-authenticated-user", JSON.stringify(user));
-        return response;
-      }
-    } catch {}
+  // If refresh failed → clear both cookies & redirect to login
+  if (!refreshResponse.ok) {
+    const redirectRes = NextResponse.redirect(loginUrl);
+    redirectRes.cookies.delete("accessToken");
+    redirectRes.cookies.delete("refreshToken");
+    return redirectRes;
   }
 
-  try {
-    const refreshResponse = await fetch(`${process.env.API_URL}/auth/refresh`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: cookieHeader,
-      },
-      credentials: "include",
-    });
-
-    if (!refreshResponse.ok) {
-      throw new Error("Refresh failed");
+  // Otherwise, propagate Set-Cookie headers so browser updates cookies
+  const proxyRes = NextResponse.next();
+  const setCookieHeader = refreshResponse.headers.get("set-cookie");
+  if (setCookieHeader) {
+    for (const cookieStr of setCookieHeader.split(",")) {
+      proxyRes.headers.append("Set-Cookie", cookieStr.trim());
     }
-
-    const user = await refreshResponse.json();
-
-    const response = NextResponse.next();
-
-    response.headers.set("x-authenticated-user", JSON.stringify(user));
-
-    return response;
-  } catch (error) {
-    const response = NextResponse.redirect(loginUrl);
-    response.cookies.delete("refreshToken");
-    response.cookies.delete("accessToken");
-    return response;
   }
+
+  const user = await refreshResponse.json();
+  proxyRes.headers.set("x-authenticated-user", JSON.stringify(user));
+
+  return proxyRes;
 }

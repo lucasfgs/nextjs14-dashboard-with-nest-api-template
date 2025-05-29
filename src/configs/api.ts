@@ -1,7 +1,8 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
-import cookie from "cookie";
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from "axios";
 
-// Browser‐side axios instance
+// ————————————————
+// Shared Axios instance (browser only)
+// ————————————————
 const axiosClient: AxiosInstance = axios.create({
   baseURL: process.env.API_URL,
   withCredentials: true,
@@ -11,114 +12,155 @@ const axiosClient: AxiosInstance = axios.create({
   },
 });
 
-// Attach accessToken to every browser request
-axiosClient.interceptors.request.use((cfg) => {
-  if (typeof document !== "undefined") {
-    const cookies = cookie.parse(document.cookie);
-    if (cookies.accessToken) {
-      cfg.headers = cfg.headers ?? {};
-      cfg.headers.Authorization = `Bearer ${cookies.accessToken}`;
+// ————————————————
+// Refresh Queue Logic
+// ————————————————
+let isRefreshing = false;
+let refreshFailed = false;
+const requestQueue: Array<{
+  config: AxiosRequestConfig;
+  resolve: (value: AxiosResponse) => void;
+  reject: (error: any) => void;
+}> = [];
+
+async function processQueue(error: any) {
+  for (const { config, resolve, reject } of requestQueue) {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(await axiosClient(config));
     }
   }
-  return cfg;
-});
+  requestQueue.length = 0;
+}
 
-// Auto‐refresh on 401 + retry in the browser
+// ————————————————
+// Client-side interceptor: on 401 → silent refresh → retry queued
+// ————————————————
 axiosClient.interceptors.response.use(
-  (res) => res,
-  async (err) => {
-    const orig = err.config!;
-    if (err.response?.status === 401 && !orig._retry) {
-      orig._retry = true;
-      try {
-        await axiosClient.post("/auth/refresh");
-        // After refresh, the backend will set a new accessToken cookie
-        // The next request will automatically pick it up from cookies
-        return axiosClient(orig);
-      } catch {
-        if (typeof window !== "undefined") window.location.href = "/login";
-        return Promise.reject(err);
+  (response: AxiosResponse) => response,
+  (error) => {
+    const origReq = error.config as any;
+    const url = origReq.url as string;
+
+    // If this is the refresh endpoint itself, handle failure immediately
+    if (url.includes("/auth/refresh")) {
+      refreshFailed = true;
+      // redirect to login on first refresh failure
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
       }
+      return Promise.reject(error);
     }
-    return Promise.reject(err);
+
+    // For all other 401s, attempt queue + refresh logic
+    if (error.response?.status === 401) {
+      // If already retried or refresh previously failed, redirect
+      if (origReq._retry || refreshFailed) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+
+      // Mark original request for retry and queue it
+      origReq._retry = true;
+      return new Promise<AxiosResponse>((resolve, reject) => {
+        requestQueue.push({ config: origReq, resolve, reject });
+
+        if (!isRefreshing) {
+          isRefreshing = true;
+          axiosClient
+            .post("/auth/refresh")
+            .then(() => {
+              processQueue(null);
+            })
+            .catch((err) => {
+              refreshFailed = true;
+              processQueue(err);
+              if (typeof window !== "undefined") {
+                window.location.href = "/login";
+              }
+            })
+            .finally(() => {
+              isRefreshing = false;
+            });
+        }
+      });
+    }
+
+    return Promise.reject(error);
   }
 );
 
+// ————————————————
+// Universal Request Helper
+// ————————————————
 export interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
   headers?: Record<string, string>;
   body?: any;
 }
 
-/**
- * Universal request helper.
- * - In the browser: delegates to axiosClient.
- * - In SSR: first tries an accessToken cookie, then falls back to refresh.
- */
 export async function request<T = any>(
   path: string,
   { method = "GET", headers: extra = {}, body }: RequestOptions = {}
 ): Promise<{ data: T }> {
   const isBrowser = typeof window !== "undefined";
-  if (!isBrowser) {
-    // ── SERVER SIDE ──
 
-    let cookieHeader = "";
-    try {
-      // Works only in App Router server components
-      // Fails silently under pages/ so cookieHeader remains empty
-      const { cookies } = require("next/headers");
-      cookieHeader = cookies()
-        .getAll()
-        .map((c: any) => `${c.name}=${c.value}`)
-        .join("; ");
-    } catch {
-      /* no-op */
-    }
-
-    const parsed = cookie.parse(cookieHeader || "");
-    const accessToken = parsed.accessToken;
-
-    // 3) Call the actual backend via Next.js proxy
-    const res = await fetch(`${process.env.API_URL}${path}`, {
+  if (isBrowser) {
+    const response = await axiosClient.request<T>({
+      url: path,
       method,
-      headers: {
-        "Content-Type": "application/json",
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        ...extra,
-      },
-      credentials: "include",
-      cache: "no-store",
-      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      data: body,
+      headers: extra,
+      withCredentials: true,
     });
-
-    if (!res.ok) {
-      const err = await res.text().catch(() => "");
-      throw new Error(`${method} ${path} failed: ${res.status} ${err}`);
-    }
-    if (res.status === 204 || method === "HEAD") {
-      return { data: null as unknown as T };
-    }
-    return { data: (await res.json()) as T };
+    return { data: response.data };
   }
 
-  // ── BROWSER SIDE ──
-  const cfg: AxiosRequestConfig = {
-    url: path,
+  let cookieHeader = "";
+  try {
+    const { cookies } = require("next/headers");
+    cookieHeader = cookies()
+      .getAll()
+      .map((c: any) => `${c.name}=${c.value}`)
+      .join("; ");
+  } catch {
+    // pages/ router fallback
+  }
+
+  const res = await fetch(`${process.env.API_URL}${path}`, {
     method,
-    data: body,
     headers: {
-      ...extra,
       "Content-Type": "application/json",
-      Accept: "application/json",
+      ...extra,
+      Cookie: cookieHeader,
     },
-    withCredentials: true,
-  };
-  const response = await axiosClient.request(cfg);
-  return { data: response.data as T };
+    credentials: "include",
+    cache: "no-store",
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    const errText = await res.text().catch(() => "");
+    throw new Error(`${method} ${path} failed: ${res.status} ${errText}`);
+  }
+
+  if (res.status === 204 || method === "HEAD") {
+    return { data: null as unknown as T };
+  }
+
+  const data = (await res.json()) as T;
+  return { data };
 }
 
-// Mirror common axios methods
+// ————————————————
+// Convenience Methods
+// ————————————————
 const api = {
   request,
   get: <T = any>(p: string, h?: Record<string, string>) =>
