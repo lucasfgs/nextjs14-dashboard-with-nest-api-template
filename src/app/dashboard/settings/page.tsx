@@ -19,10 +19,17 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { EPermission, EPermissionType } from "@/configs/permissions";
 
 export default function Settings() {
   return (
-    <Page layout={ELayout.Compact}>
+    <Page
+      layout={ELayout.Compact}
+      permission={{
+        name: EPermission.SETTINGS,
+        type: EPermissionType.READ,
+      }}
+    >
       <PageHeader>
         <PageHeaderTitle>Settings</PageHeaderTitle>
       </PageHeader>

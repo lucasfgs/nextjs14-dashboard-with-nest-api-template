@@ -17,7 +17,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
     let socketInstance: Socket;
     async function getSocket() {
       // Create a socket connection
-      socketInstance = io("http://localhost:4000", {
+      socketInstance = io(process.env.WEBSOCKET_URL || "", {
         autoConnect: true,
         transports: ["websocket", "polling"],
         withCredentials: true,
