@@ -138,7 +138,14 @@ export default function Login() {
           )}{" "}
           Facebook
         </Button>
-        <Button variant="outline" type="button" disabled={status === "pending"}>
+        <Button
+          variant="outline"
+          type="button"
+          disabled={status === "pending"}
+          onClick={() => {
+            window.location.href = `${process.env.API_URL}/auth/google`;
+          }}
+        >
           {status === "pending" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
