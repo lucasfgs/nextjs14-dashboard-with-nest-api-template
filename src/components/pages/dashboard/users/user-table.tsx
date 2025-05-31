@@ -2,15 +2,13 @@
 
 import {
   ColumnDef,
-  ColumnFiltersState,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { MoreHorizontal } from "lucide-react";
 
 import {
@@ -27,17 +25,21 @@ import { DataTableColumnHeader } from "@/components/custom/data-table/column-hea
 import { DataTable } from "@/components/custom/data-table";
 import { DataTablePagination } from "@/components/custom/data-table/pagination";
 import { DataTableViewOptions } from "@/components/custom/data-table/view-options";
+import { useDataTable } from "@/components/custom/data-table/use-data-table";
 import { cn } from "@/lib/utils";
 import {
   TGetAllUsersResponse,
   useGetAllUsers,
+  GET_ALL_USERS_QUERY_KEY,
 } from "@/services/api/users/use-get-all-users";
+import { createPaginationQueryKey } from "@/utils/pagination";
 
 interface UserTableProps extends React.HTMLAttributes<HTMLDivElement> {
-  users?: TGetAllUsersResponse[];
+  users?: TGetAllUsersResponse["data"];
+  initialData?: TGetAllUsersResponse;
 }
 
-const columns: ColumnDef<TGetAllUsersResponse>[] = [
+const columns: ColumnDef<TGetAllUsersResponse["data"][0]>[] = [
   {
     accessorKey: "id",
     header: ({ column }) => (
@@ -102,25 +104,60 @@ export default function UserTable({
   className,
   ...props
 }: UserTableProps) {
-  const defaultData = React.useMemo(() => [], []);
+  const {
+    sorting,
+    setSorting,
+    pagination,
+    setPagination,
+    columnFilters,
+    setColumnFilters,
+    getSortParams,
+    getPaginationParams,
+  } = useDataTable();
 
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const params = useMemo(
+    () => ({
+      ...getPaginationParams(),
+      ...getSortParams(),
+    }),
+    [getPaginationParams, getSortParams]
+  );
 
-  const { data } = useGetAllUsers();
+  const { data, isLoading } = useGetAllUsers(params, {
+    queryKey: createPaginationQueryKey(GET_ALL_USERS_QUERY_KEY, params),
+  });
+
+  // Update pagination when data changes
+  useEffect(() => {
+    const page = data?.meta?.page;
+    if (typeof page === "number") {
+      setPagination((prev) => ({
+        ...prev,
+        pageIndex: page - 1,
+      }));
+    }
+  }, [data?.meta?.page, setPagination]);
 
   const table = useReactTable({
     columns,
-    data: data || defaultData,
+    data: data?.data || [],
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onPaginationChange: setPagination,
+    manualPagination: true,
+    manualSorting: true,
+    pageCount: data?.meta?.totalPages || 0,
     state: {
       sorting,
       columnFilters,
+      pagination: {
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+      },
     },
   });
 
@@ -137,7 +174,11 @@ export default function UserTable({
         />
         <DataTableViewOptions table={table} />
       </div>
-      <DataTable table={table} />
+      <DataTable
+        table={table}
+        isLoading={isLoading}
+        loadingRows={pagination.pageSize}
+      />
       <DataTablePagination table={table} />
     </div>
   );

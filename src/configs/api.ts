@@ -39,27 +39,23 @@ async function processQueue(error: any) {
 // ————————————————
 axiosClient.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error) => {
+  async (error) => {
     const origReq = error.config as any;
     const url = origReq.url as string;
 
     // If this is the refresh endpoint itself, handle failure immediately
     if (url.includes("/auth/refresh")) {
-      refreshFailed = true;
-      // redirect to login on first refresh failure
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
+      // Only set refreshFailed if we get a specific error indicating the refresh token is invalid
+      if (error.response?.status === 401) {
+        refreshFailed = true;
       }
       return Promise.reject(error);
     }
 
     // For all other 401s, attempt queue + refresh logic
     if (error.response?.status === 401) {
-      // If already retried or refresh previously failed, redirect
+      // If already retried or refresh previously failed, reject
       if (origReq._retry || refreshFailed) {
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
         return Promise.reject(error);
       }
 
@@ -72,15 +68,17 @@ axiosClient.interceptors.response.use(
           isRefreshing = true;
           axiosClient
             .post("/auth/refresh")
-            .then(() => {
+            .then((response) => {
+              // Reset refresh failed flag on successful refresh
+              refreshFailed = false;
               processQueue(null);
             })
             .catch((err) => {
-              refreshFailed = true;
-              processQueue(err);
-              if (typeof window !== "undefined") {
-                window.location.href = "/login";
+              // Only set refreshFailed if we get a 401 from the refresh endpoint
+              if (err.response?.status === 401) {
+                refreshFailed = true;
               }
+              processQueue(err);
             })
             .finally(() => {
               isRefreshing = false;
@@ -102,10 +100,36 @@ export interface RequestOptions {
   body?: any;
 }
 
+export interface ApiResponse<T> {
+  data: T;
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+  links?: {
+    first: string;
+    last: string;
+    next: string | null;
+    previous: string | null;
+  };
+}
+
+function isPaginatedResponse<T>(data: any): data is ApiResponse<T> {
+  return (
+    data &&
+    typeof data === "object" &&
+    "data" in data &&
+    "meta" in data &&
+    "links" in data
+  );
+}
+
 export async function request<T = any>(
   path: string,
   { method = "GET", headers: extra = {}, body }: RequestOptions = {}
-): Promise<{ data: T }> {
+): Promise<ApiResponse<T>> {
   const isBrowser = typeof window !== "undefined";
 
   if (isBrowser) {
@@ -116,6 +140,13 @@ export async function request<T = any>(
       headers: extra,
       withCredentials: true,
     });
+
+    // If the response has meta and links, return it as is
+    if (isPaginatedResponse<T>(response.data)) {
+      return response.data;
+    }
+
+    // Otherwise, wrap the data in our standard format
     return { data: response.data };
   }
 
@@ -155,7 +186,13 @@ export async function request<T = any>(
     return { data: null as unknown as T };
   }
 
-  const data = (await res.json()) as T;
+  const data = await res.json();
+
+  // If the response has meta and links, return it as is
+  if (isPaginatedResponse<T>(data)) {
+    return data;
+  }
+
   return { data };
 }
 

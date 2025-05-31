@@ -9,6 +9,12 @@ export async function authenticationMiddleware(request: NextRequest) {
   const { headers, nextUrl } = request;
   const loginUrl = new URL(`${process.env.APP_PREFIX}/login`, nextUrl);
 
+  // Store the original URL as a query parameter for redirect after login
+  const originalPath = nextUrl.pathname + nextUrl.search;
+  if (originalPath !== "/login") {
+    loginUrl.searchParams.set("redirect", originalPath);
+  }
+
   // Parse incoming cookies
   const cookieHeader = headers.get("cookie") || "";
   const { accessToken, refreshToken } = parse(cookieHeader);
@@ -59,7 +65,7 @@ export async function authenticationMiddleware(request: NextRequest) {
   }
 
   const user = await refreshResponse.json();
-  proxyRes.headers.set("x-authenticated-user", JSON.stringify(user));
+  proxyRes.headers.set("x-authenticated-user", JSON.stringify(user.data));
 
   return proxyRes;
 }

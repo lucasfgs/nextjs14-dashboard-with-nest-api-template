@@ -9,12 +9,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DataTableProps<TData> extends React.HTMLAttributes<HTMLDivElement> {
   table: ITable<TData>;
+  isLoading?: boolean;
+  loadingRows?: number;
 }
 
-export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
+export function DataTable<TData>({
+  table,
+  className,
+  isLoading = false,
+  loadingRows = 5,
+}: DataTableProps<TData>) {
   return (
     <Table className={cn("", className)}>
       <TableHeader>
@@ -36,7 +44,18 @@ export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
         ))}
       </TableHeader>
       <TableBody>
-        {table.getRowModel().rows?.length ? (
+        {isLoading ? (
+          // Loading skeleton
+          Array.from({ length: loadingRows }).map((_, index) => (
+            <TableRow key={`loading-${index}`}>
+              {table.getAllColumns().map((column) => (
+                <TableCell key={column.id}>
+                  <Skeleton className="h-6 w-full" />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))
+        ) : table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row) => (
             <TableRow
               key={row.id}

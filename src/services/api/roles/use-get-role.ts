@@ -24,7 +24,7 @@ export const getRoleAction = async (
 ): Promise<TGetRoleResponse | null> => {
   if (!roleId) return null;
   const { data } = await api.get(`/roles/${roleId}`);
-  return data;
+  return data.data;
 };
 
 export const useGetRole = (roleId?: number) => {

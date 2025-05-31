@@ -14,7 +14,7 @@ export const getAllPermissionsAction = async (): Promise<
   TGetAllPermissionsResponse[]
 > => {
   const { data } = await api.get("/permissions");
-  return data;
+  return data.data;
 };
 
 export const useGetAllPermissions = () => {

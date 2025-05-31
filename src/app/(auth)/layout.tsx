@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { jwtVerify } from "jose";
 
@@ -24,9 +24,9 @@ async function isValidToken(token: string): Promise<boolean> {
 
 async function tryRefresh(): Promise<boolean> {
   try {
-    await api.post("/auth/refresh");
+    const response = await api.post("/auth/refresh");
     return true;
-  } catch {
+  } catch (error) {
     return false;
   }
 }
@@ -37,17 +37,22 @@ export default async function Layout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
+  const headersList = await headers();
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refreshToken")?.value;
 
-  // If the access token is present and valid, redirect immediately
+  // Get the redirect URL from the URL
+  const url = new URL(headersList.get("x-url") || "");
+  const redirectTo = url.searchParams.get("redirect") || "/dashboard";
+
+  // If the access token is present and valid, redirect to the original destination
   if (accessToken && (await isValidToken(accessToken))) {
-    redirect("/dashboard");
+    redirect(redirectTo);
   }
 
   // Otherwise, if a refresh token exists, attempt silent refresh
   if (refreshToken && (await tryRefresh())) {
-    redirect("/dashboard");
+    redirect(redirectTo);
   }
 
   // If neither check caused a redirect, render the login layout
