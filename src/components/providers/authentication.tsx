@@ -13,6 +13,7 @@ export type TPermission = {
 export interface IAuthenticatedUser {
   sub: string;
   email: string;
+  name: string;
   permissions: TPermission[];
 }
 
@@ -37,12 +38,15 @@ export const AuthenticationProvider: React.FC<AuthentcationProviderProps> = ({
 }) => {
   const { listenToEvent, sendEvent } = useSocket();
 
-  const [user, setUser] = useState<IAuthenticatedUser | null>(
-    authenticatedUser
-  );
-  const [permissions, setPermissions] = useState<TPermission[] | null>(
-    authenticatedUser?.permissions || null
-  );
+  // Initialize state with authenticatedUser
+  const [user, setUser] = useState<IAuthenticatedUser | null>(null);
+  const [permissions, setPermissions] = useState<TPermission[] | null>(null);
+
+  // Set initial state after mount to avoid hydration mismatch
+  useEffect(() => {
+    setUser(authenticatedUser);
+    setPermissions(authenticatedUser?.permissions || null);
+  }, [authenticatedUser]);
 
   useEffect(() => {
     listenToEvent("roles:update", (data: { permissions: TPermission[] }) => {

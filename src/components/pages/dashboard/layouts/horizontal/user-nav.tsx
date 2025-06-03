@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthentication } from "@/components/providers/authentication";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,17 +20,23 @@ export function UserNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
+  const { user } = useAuthentication();
   const { mutate: logout } = useLogout();
 
   async function signOut() {
     logout();
   }
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarFallback>LF</AvatarFallback>
+            <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -40,9 +47,9 @@ export function UserNav({
       >
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">shadcn</p>
+            <p className="text-sm font-medium leading-none">{user.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              m@example.com
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>

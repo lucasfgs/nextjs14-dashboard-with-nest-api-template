@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import DashboardLayout from "@/components/pages/dashboard/_layout";
 import { getAuthenticatedUser } from "@/utils/getAuthenticatedUser";
+import HorizontalLayout from "@/components/pages/dashboard/layouts/horizontal";
 
 import { Provider } from "./provider";
 
@@ -19,7 +19,7 @@ export default async function RootLayout({
 
   return (
     <Provider authenticatedUser={authenticatedUser}>
-      <DashboardLayout>{children}</DashboardLayout>
+      <HorizontalLayout>{children}</HorizontalLayout>
     </Provider>
   );
 }

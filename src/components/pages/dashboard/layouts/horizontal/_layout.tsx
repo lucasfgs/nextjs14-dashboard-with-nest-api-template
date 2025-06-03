@@ -4,12 +4,12 @@ import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 import { MainNav } from "./main-nav";
 import { Search } from "./search";
-import Transition from "./_transition";
 import { UserNav } from "./user-nav";
 import HamburgerMenu from "./hamburger-menu";
 import UpgradePlan from "./upgrade-plan";
+import Transition from "./_transition";
 
-export default function DashboardLayout({
+export default function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;

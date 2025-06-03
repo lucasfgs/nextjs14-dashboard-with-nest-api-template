@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { useCanAccess } from "@/utils/hooks/useCanAccess";
@@ -10,6 +13,7 @@ export function MainNav({
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
 
   const canSeeUsers = useCanAccess(EPermission.USERS, EPermissionType.READ);
   const canSeeRoles = useCanAccess(EPermission.ROLES, EPermissionType.READ);
@@ -17,6 +21,15 @@ export function MainNav({
     EPermission.SETTINGS,
     EPermissionType.READ
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render anything until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <nav
