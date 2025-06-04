@@ -18,8 +18,8 @@ export default function Layout({
     <Transition>
       <main className="flex-col md:flex relative min-h-svh">
         <div className="border-b">
-          <div className="flex h-16 items-center px-4">
-            <MainNav className="mx-6" />
+          <div className="flex h-16 items-center px-8">
+            <MainNav />
             <div className="hidden ml-auto md:flex items-center space-x-4">
               <Search />
               <ThemeSwitcher />

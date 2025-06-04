@@ -2,34 +2,41 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { useCanAccess } from "@/utils/hooks/useCanAccess";
 import { EPermission, EPermissionType } from "@/configs/permissions";
+
+export const navLinks = [
+  {
+    label: "Home",
+    href: "/dashboard",
+  },
+  {
+    label: "Users",
+    href: "/dashboard/users",
+    permission: { type: EPermission.USERS, action: EPermissionType.READ },
+    match: (pathname: string) => pathname.includes("/users"),
+  },
+  {
+    label: "Roles",
+    href: "/dashboard/roles",
+    permission: { type: EPermission.ROLES, action: EPermissionType.READ },
+    match: (pathname: string) => pathname.includes("/roles"),
+  },
+  {
+    label: "Settings",
+    href: "/dashboard/settings",
+    permission: { type: EPermission.SETTINGS, action: EPermissionType.READ },
+    match: (pathname: string) => pathname.includes("/settings"),
+  },
+];
 
 export function MainNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
-
-  const canSeeUsers = useCanAccess(EPermission.USERS, EPermissionType.READ);
-  const canSeeRoles = useCanAccess(EPermission.ROLES, EPermissionType.READ);
-  const canSeeSettings = useCanAccess(
-    EPermission.SETTINGS,
-    EPermissionType.READ
-  );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Don't render anything until mounted to prevent hydration mismatch
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <nav
@@ -55,49 +62,31 @@ export function MainNav({
       </Link>
 
       {/* Nav Links */}
-      <Link
-        href="/dashboard"
-        className={cn(
-          "text-lg md:text-sm font-medium transition-colors hover:text-primary",
-          pathname === "/dashboard" ? "" : "text-muted-foreground"
-        )}
-      >
-        Home
-      </Link>
-
-      {canSeeUsers && (
-        <Link
-          href="/dashboard/users"
-          className={cn(
-            "text-lg md:text-sm font-medium transition-colors hover:text-primary",
-            pathname.includes("/users") ? "" : "text-muted-foreground"
-          )}
-        >
-          Users
-        </Link>
-      )}
-      {canSeeRoles && (
-        <Link
-          href="/dashboard/roles"
-          className={cn(
-            "text-lg md:text-sm font-medium transition-colors hover:text-primary",
-            pathname.includes("/roles") ? "" : "text-muted-foreground"
-          )}
-        >
-          Roles
-        </Link>
-      )}
-      {canSeeSettings && (
-        <Link
-          href="/dashboard/settings"
-          className={cn(
-            "text-lg md:text-sm font-medium transition-colors hover:text-primary",
-            pathname.includes("/settings") ? "" : "text-muted-foreground"
-          )}
-        >
-          Settings
-        </Link>
-      )}
+      {navLinks.map((link) => {
+        // Permission check
+        if (link.permission) {
+          const canAccess = useCanAccess(
+            link.permission.type,
+            link.permission.action
+          );
+          if (!canAccess) return null;
+        }
+        const isActive = link.match
+          ? link.match(pathname)
+          : pathname === link.href;
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={cn(
+              "text-lg md:text-sm font-medium transition-colors hover:text-primary",
+              isActive ? "" : "text-muted-foreground"
+            )}
+          >
+            {link.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

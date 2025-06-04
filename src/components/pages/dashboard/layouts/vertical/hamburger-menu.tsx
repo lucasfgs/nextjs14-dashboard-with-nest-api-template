@@ -38,6 +38,7 @@ export default function HamburgerMenu() {
                 key={link.href}
                 className="flex items-center gap-2 px-4 py-2 rounded-md text-lg font-medium transition-colors w-full justify-center"
               >
+                <link.icon className="w-5 h-5" />
                 <span className="text-lg font-medium">{link.label}</span>
               </Link>
             ))}
