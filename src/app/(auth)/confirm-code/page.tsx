@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,12 +35,13 @@ export default function Login() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const { mutate: forgotPassword, status: forgotPasswordStatus } =
+  const { mutateAsync: forgotPassword, status: forgotPasswordStatus } =
     useForgotPassword();
   const {
-    mutate: confirmRecoveryPasswordCode,
+    mutateAsync: confirmRecoveryPasswordCode,
     status: recoveryPasswordCodeStatus,
   } = useConfirmRecoveryPasswordCode();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -56,10 +58,15 @@ export default function Login() {
       return router.push("/login");
     }
 
-    confirmRecoveryPasswordCode({
-      email,
-      confirmationCode: values.confirmationCode,
-    });
+    try {
+      setIsLoading(true);
+      await confirmRecoveryPasswordCode({
+        email,
+        confirmationCode: values.confirmationCode,
+      });
+    } catch (e) {
+      setIsLoading(false);
+    }
   }
 
   async function resendCode() {
@@ -70,9 +77,14 @@ export default function Login() {
       return router.push("/login");
     }
 
-    forgotPassword({
-      email,
-    });
+    try {
+      setIsLoading(true);
+      await forgotPassword({
+        email,
+      });
+    } catch (e) {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -100,7 +112,10 @@ export default function Login() {
                         <InputOTP
                           id="confirmationCode"
                           maxLength={6}
-                          disabled={recoveryPasswordCodeStatus === "pending"}
+                          disabled={
+                            isLoading ||
+                            recoveryPasswordCodeStatus === "pending"
+                          }
                           {...field}
                         >
                           <InputOTPGroup className="flex 1">
@@ -121,8 +136,10 @@ export default function Login() {
                   )}
                 />
               </div>
-              <Button disabled={recoveryPasswordCodeStatus === "pending"}>
-                {recoveryPasswordCodeStatus === "pending" && (
+              <Button
+                disabled={isLoading || recoveryPasswordCodeStatus === "pending"}
+              >
+                {(isLoading || recoveryPasswordCodeStatus === "pending") && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 Next
@@ -140,7 +157,7 @@ export default function Login() {
           className="mt-2"
           onClick={() => resendCode()}
         >
-          {forgotPasswordStatus === "pending" && (
+          {(isLoading || forgotPasswordStatus === "pending") && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
           Resend

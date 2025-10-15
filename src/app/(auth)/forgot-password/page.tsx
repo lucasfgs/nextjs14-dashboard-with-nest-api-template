@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,7 +49,8 @@ type ConfirmForgotPasswordCodeSchema = z.infer<
 
 export default function Login() {
   const router = useRouter();
-  const { mutate: forgotPassword, status } = useForgotPassword();
+  const { mutateAsync: forgotPassword, status } = useForgotPassword();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const forgotPasswordForm = useForm<ForgotPasswordFormSchema>({
     resolver: zodResolver(forgotPasswodFormSchema),
@@ -58,9 +60,15 @@ export default function Login() {
   });
 
   async function resetPassword(values: ForgotPasswordFormSchema) {
-    forgotPassword({
-      email: values.email,
-    });
+    try {
+      setIsLoading(true);
+      await forgotPassword({
+        email: values.email,
+      });
+      // keep loading until navigation happens in hook
+    } catch (e) {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -90,7 +98,7 @@ export default function Login() {
                           type="email"
                           autoCapitalize="none"
                           autoCorrect="off"
-                          disabled={status === "pending"}
+                          disabled={isLoading || status === "pending"}
                           {...field}
                         />
                       </FormControl>
@@ -99,8 +107,8 @@ export default function Login() {
                   )}
                 />
               </div>
-              <Button disabled={status === "pending"}>
-                {status === "pending" && (
+              <Button disabled={isLoading || status === "pending"}>
+                {(isLoading || status === "pending") && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 Send

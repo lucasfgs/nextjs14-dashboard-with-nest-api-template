@@ -1,11 +1,11 @@
 "use client";
+import { useEffect, useState } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,7 +46,8 @@ export default function Login() {
 
   const { email, confirmationCode } = useAuth();
 
-  const { mutate: resetPassword, status } = useResetPassword();
+  const { mutateAsync: resetPassword, status } = useResetPassword();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(confirmForgotPasswordCodeSchema),
@@ -74,12 +75,17 @@ export default function Login() {
       return router.push("/login");
     }
 
-    resetPassword({
-      code: confirmationCode,
-      email: email,
-      password: values.password,
-      passwordConfirmation: values.confirmPassword,
-    });
+    try {
+      setIsLoading(true);
+      await resetPassword({
+        code: confirmationCode,
+        email: email,
+        password: values.password,
+        passwordConfirmation: values.confirmPassword,
+      });
+    } catch (e) {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -110,7 +116,7 @@ export default function Login() {
                           type="password"
                           autoCapitalize="none"
                           autoCorrect="off"
-                          disabled={status === "pending"}
+                          disabled={isLoading || status === "pending"}
                           {...field}
                         />
                       </FormControl>
@@ -133,7 +139,7 @@ export default function Login() {
                           type="password"
                           autoCapitalize="none"
                           autoCorrect="off"
-                          disabled={status === "pending"}
+                          disabled={isLoading || status === "pending"}
                           {...field}
                         />
                       </FormControl>
@@ -142,8 +148,8 @@ export default function Login() {
                   )}
                 />
               </div>
-              <Button disabled={status === "pending"}>
-                {status === "pending" && (
+              <Button disabled={isLoading || status === "pending"}>
+                {(isLoading || status === "pending") && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 Next

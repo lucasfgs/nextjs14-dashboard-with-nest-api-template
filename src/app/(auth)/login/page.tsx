@@ -1,8 +1,8 @@
 "use client";
+import React from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import "@aws-amplify/ui-react/styles.css";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -27,7 +27,8 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function Login() {
-  const { mutate: login, status } = useLogin();
+  const { mutateAsync: login, status } = useLogin();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -38,10 +39,17 @@ export default function Login() {
   });
 
   async function onSubmit(values: FormSchema) {
-    login({
-      email: values.email,
-      password: values.password,
-    });
+    try {
+      setIsLoading(true);
+      await login({
+        email: values.email,
+        password: values.password,
+      });
+      // keep loading until navigation happens in hook
+    } catch (e) {
+      // error handled by hook, stop loading so user can retry
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -71,7 +79,7 @@ export default function Login() {
                           autoCapitalize="none"
                           autoComplete="email"
                           autoCorrect="off"
-                          disabled={status === "pending"}
+                          disabled={isLoading || status === "pending"}
                           {...field}
                         />
                       </FormControl>
@@ -102,7 +110,7 @@ export default function Login() {
                           type="password"
                           autoCapitalize="none"
                           autoCorrect="off"
-                          disabled={status === "pending"}
+                          disabled={isLoading || status === "pending"}
                           {...field}
                         />
                       </FormControl>
@@ -111,8 +119,8 @@ export default function Login() {
                   )}
                 />
               </div>
-              <Button disabled={status === "pending"}>
-                {status === "pending" && (
+              <Button disabled={isLoading || status === "pending"}>
+                {(isLoading || status === "pending") && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 Sign In with Email
@@ -130,8 +138,12 @@ export default function Login() {
             </span>
           </div>
         </div>
-        <Button variant="outline" type="button" disabled={status === "pending"}>
-          {status === "pending" ? (
+        <Button
+          variant="outline"
+          type="button"
+          disabled={isLoading || status === "pending"}
+        >
+          {isLoading || status === "pending" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Icons.facebook className="mr-2 h-4 w-4" />
@@ -141,12 +153,12 @@ export default function Login() {
         <Button
           variant="outline"
           type="button"
-          disabled={status === "pending"}
+          disabled={isLoading || status === "pending"}
           onClick={() => {
             window.location.href = `${process.env.API_URL}/auth/google`;
           }}
         >
-          {status === "pending" ? (
+          {isLoading || status === "pending" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Icons.google className="mr-2 h-4 w-4" />

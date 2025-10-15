@@ -1,11 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
 
 import api from "@/configs/api";
-import { createQueryString as createQueryStringRaw } from "@/utils/createQueryString";
 
 type ForgotPassword = {
   email: string;
@@ -20,11 +17,6 @@ const forgotPassword = async (
 };
 
 export const useForgotPassword = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const createQueryString = useCallback(createQueryStringRaw, [searchParams]);
-
   return useMutation<void, AxiosError, ForgotPassword>({
     mutationFn: forgotPassword,
     mutationKey: FORGOT_PASSWORD_MUTATION_KEY,
@@ -32,11 +24,6 @@ export const useForgotPassword = () => {
       if (error.status === 401) {
         toast.error("Invalid email");
       }
-    },
-    onSuccess: (_, { email }) => {
-      router.push(
-        `confirm-code?${createQueryString("email", email, searchParams)}`
-      );
     },
   });
 };
