@@ -54,6 +54,19 @@ axiosClient.interceptors.response.use(
 
     // For all other 401s, attempt queue + refresh logic
     if (error.response?.status === 401) {
+      // Skip token refresh for 2FA endpoints
+      if (url.includes("/auth/2fa/")) {
+        return Promise.reject(error);
+      }
+
+      // Skip token refresh for login endpoint when 2FA is required
+      if (
+        error.response?.data?.message ===
+        "Two-factor authentication token is required"
+      ) {
+        return Promise.reject(error);
+      }
+
       // If already retried or refresh previously failed, reject
       if (origReq._retry || refreshFailed) {
         return Promise.reject(error);
@@ -98,6 +111,7 @@ export interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
   headers?: Record<string, string>;
   body?: any;
+  responseType?: "json" | "blob" | "arraybuffer" | "text";
 }
 
 export interface ApiResponse<T> {
@@ -116,20 +130,15 @@ export interface ApiResponse<T> {
   };
 }
 
-function isPaginatedResponse<T>(data: any): data is ApiResponse<T> {
-  return (
-    data &&
-    typeof data === "object" &&
-    "data" in data &&
-    "meta" in data &&
-    "links" in data
-  );
-}
-
 export async function request<T = any>(
   path: string,
-  { method = "GET", headers: extra = {}, body }: RequestOptions = {}
-): Promise<ApiResponse<T>> {
+  {
+    method = "GET",
+    headers: extra = {},
+    body,
+    responseType = "json",
+  }: RequestOptions = {}
+): Promise<ApiResponse<T> | T> {
   const isBrowser = typeof window !== "undefined";
 
   if (isBrowser) {
@@ -139,15 +148,23 @@ export async function request<T = any>(
       data: body,
       headers: extra,
       withCredentials: true,
+      responseType: responseType as any,
     });
 
-    // If the response has meta and links, return it as is
-    if (isPaginatedResponse<T>(response.data)) {
-      return response.data;
+    // For blob/arraybuffer/text responses, return raw data
+    if (responseType !== "json") {
+      return response.data as T;
     }
 
-    // Otherwise, wrap the data in our standard format
-    return { data: response.data };
+    // Check if response.data is already wrapped in ApiResponse format
+    const data = response.data;
+    if (data && typeof data === "object" && "data" in data) {
+      // Already wrapped in ApiResponse format
+      return data as ApiResponse<T>;
+    } else {
+      // Raw data, wrap it in ApiResponse format
+      return { data: data as T } as ApiResponse<T>;
+    }
   }
 
   let cookieHeader = "";
@@ -158,16 +175,22 @@ export async function request<T = any>(
     cookieHeader = allCookies
       .map((c: any) => `${c.name}=${c.value}`)
       .join("; ");
-  } catch {
+  } catch (error) {
+    console.log(`[API] Failed to read cookies on server:`, error);
     // pages/ router fallback
   }
 
-  const res = await fetch(`${process.env.API_URL}${path}`, {
+  // Ensure proper URL construction without double slashes
+  const baseUrl = (process.env.API_URL || "").replace(/\/$/, ""); // Remove trailing slash
+  const cleanPath = path.startsWith("/") ? path : `/${path}`; // Ensure path starts with slash
+  const fullUrl = `${baseUrl}${cleanPath}`;
+
+  const res = await fetch(fullUrl, {
     method,
     headers: {
       "Content-Type": "application/json",
       ...extra,
-      Cookie: cookieHeader,
+      ...(cookieHeader ? { Cookie: cookieHeader } : {}),
     },
     credentials: "include",
     cache: "no-store",
@@ -179,7 +202,7 @@ export async function request<T = any>(
       throw new Error("Unauthorized");
     }
     const errText = await res.text().catch(() => "");
-    throw new Error(`${method} ${path} failed: ${res.status} ${errText}`);
+    throw new Error(`${method} ${cleanPath} failed: ${res.status} ${errText}`);
   }
 
   if (res.status === 204 || method === "HEAD") {
@@ -188,12 +211,14 @@ export async function request<T = any>(
 
   const data = await res.json();
 
-  // If the response has meta and links, return it as is
-  if (isPaginatedResponse<T>(data)) {
-    return data;
+  // Check if response data is already wrapped in ApiResponse format
+  if (data && typeof data === "object" && "data" in data) {
+    // Already wrapped in ApiResponse format
+    return data as ApiResponse<T>;
+  } else {
+    // Raw data, wrap it in ApiResponse format
+    return { data: data as T } as ApiResponse<T>;
   }
-
-  return { data };
 }
 
 // ————————————————
@@ -201,20 +226,60 @@ export async function request<T = any>(
 // ————————————————
 const api = {
   request,
-  get: <T = any>(p: string, h?: Record<string, string>) =>
-    request<T>(p, { method: "GET", headers: h }),
-  post: <T = any>(p: string, b?: any, h?: Record<string, string>) =>
-    request<T>(p, { method: "POST", body: b, headers: h }),
-  put: <T = any>(p: string, b?: any, h?: Record<string, string>) =>
-    request<T>(p, { method: "PUT", body: b, headers: h }),
-  patch: <T = any>(p: string, b?: any, h?: Record<string, string>) =>
-    request<T>(p, { method: "PATCH", body: b, headers: h }),
-  delete: <T = any>(p: string, h?: Record<string, string>) =>
-    request<T>(p, { method: "DELETE", headers: h }),
-  options: <T = any>(p: string, h?: Record<string, string>) =>
-    request<T>(p, { method: "OPTIONS", headers: h }),
-  head: <T = any>(p: string, h?: Record<string, string>) =>
-    request<T>(p, { method: "HEAD", headers: h }),
+  get: <T = any>(
+    p: string,
+    options?: {
+      headers?: Record<string, string>;
+      responseType?: "json" | "blob" | "arraybuffer" | "text";
+    }
+  ): Promise<ApiResponse<T>> =>
+    request<T>(p, {
+      method: "GET",
+      headers: options?.headers,
+      responseType: options?.responseType,
+    }) as Promise<ApiResponse<T>>,
+  post: <T = any>(
+    p: string,
+    b?: any,
+    h?: Record<string, string>
+  ): Promise<ApiResponse<T>> =>
+    request<T>(p, { method: "POST", body: b, headers: h }) as Promise<
+      ApiResponse<T>
+    >,
+  put: <T = any>(
+    p: string,
+    b?: any,
+    h?: Record<string, string>
+  ): Promise<ApiResponse<T>> =>
+    request<T>(p, { method: "PUT", body: b, headers: h }) as Promise<
+      ApiResponse<T>
+    >,
+  patch: <T = any>(
+    p: string,
+    b?: any,
+    h?: Record<string, string>
+  ): Promise<ApiResponse<T>> =>
+    request<T>(p, { method: "PATCH", body: b, headers: h }) as Promise<
+      ApiResponse<T>
+    >,
+  delete: <T = any>(
+    p: string,
+    b?: any,
+    h?: Record<string, string>
+  ): Promise<ApiResponse<T>> =>
+    request<T>(p, { method: "DELETE", body: b, headers: h }) as Promise<
+      ApiResponse<T>
+    >,
+  options: <T = any>(
+    p: string,
+    h?: Record<string, string>
+  ): Promise<ApiResponse<T>> =>
+    request<T>(p, { method: "OPTIONS", headers: h }) as Promise<ApiResponse<T>>,
+  head: <T = any>(
+    p: string,
+    h?: Record<string, string>
+  ): Promise<ApiResponse<T>> =>
+    request<T>(p, { method: "HEAD", headers: h }) as Promise<ApiResponse<T>>,
 };
 
 export default api;
