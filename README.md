@@ -26,6 +26,7 @@ Create a `.env.local` file in the root directory with the following variables:
 ```env
 # API Configuration
 NEXT_PUBLIC_API_URL="http://localhost:4000"
+API_URL="http://localhost:4000"
 APP_PREFIX=""
 WEBSOCKET_URL="ws://localhost:4000"
 ```
