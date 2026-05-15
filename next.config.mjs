@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    typedRoutes: true,
+  },
   env: {
     API_URL: process.env.API_URL,
     APP_PREFIX: process.env.APP_PREFIX,

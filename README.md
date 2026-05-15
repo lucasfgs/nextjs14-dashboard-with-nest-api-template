@@ -26,7 +26,9 @@ Create a `.env.local` file in the root directory with the following variables:
 ```env
 # API Configuration
 NEXT_PUBLIC_API_URL="http://localhost:4000"
+API_URL="http://localhost:4000"
 APP_PREFIX=""
+WEBSOCKET_URL="ws://localhost:4000"
 ```
 
 ## Installation
@@ -43,22 +45,26 @@ $ yarn dev
 
 ```
 src/
-├── app/                    # Next.js 13+ app directory
-│   ├── (auth)/            # Authentication routes
-│   │   ├── login/         # Login page
+├── app/                    # Next.js app directory
+│   ├── (auth)/             # Authentication routes
+│   │   ├── login/          # Login page
 │   │   └── ...
-│   ├── api/               # API routes
+│   ├── api/                # API routes
 │   └── ...
-├── components/            # Reusable components
-│   ├── ui/               # UI components
+├── components/             # Reusable components
+│   ├── ui/                 # UI components
 │   └── ...
-├── configs/              # Configuration files
-│   ├── api.ts           # API client configuration
+├── configs/                # Configuration files
+│   ├── api.ts              # API client configuration
 │   └── ...
-├── middlewares/          # Next.js middlewares
-│   └── authentication.ts # Auth middleware
-└── utils/               # Utility functions
+├── middlewares/            # Next.js middlewares
+│   └── authentication.ts   # Auth middleware
+└── utils/                  # Utility functions
 ```
+
+## Compatibility Notes
+
+This template currently targets Next.js 15.3.2 with React 19.1.0 and uses typed routes, the App Router, and ESLint-based linting.
 
 ## Authentication Flow
 
@@ -107,8 +113,8 @@ $ yarn build
 # Start production server
 $ yarn start
 
-# Run tests
-$ yarn test
+# Run lint
+$ yarn lint
 ```
 
 ## Styling
